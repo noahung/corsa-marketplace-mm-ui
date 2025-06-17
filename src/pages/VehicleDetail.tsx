@@ -400,7 +400,7 @@ const VehicleDetail = () => {
         isOpen={contactModal.isOpen}
         onClose={() => setContactModal({ isOpen: false, type: null })}
         vehicleId={vehicle.id.toString()}
-        sellerId={vehicle.owner_id.toString()} // Convert number to string
+        sellerId={vehicle.owner_id.toString()}
         vehicleTitle={vehicle.title}
         enquiryType={contactModal.type!}
       />

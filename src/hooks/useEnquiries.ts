@@ -31,7 +31,6 @@ export const useEnquiries = () => {
     setLoading(true);
     
     try {
-      // For now, we'll use the chats table to store enquiries
       const { error } = await supabase
         .from('chats')
         .insert({

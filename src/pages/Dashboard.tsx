@@ -27,6 +27,8 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
+      const userId = parseInt(user?.id || '0');
+      
       // Fetch user's listings
       const { data: listingsData } = await supabase
         .from('listings')
@@ -34,7 +36,7 @@ const Dashboard = () => {
           *,
           listing_images (url)
         `)
-        .eq('owner_id', parseInt(user?.id || '0'));
+        .eq('owner_id', userId);
 
       if (listingsData) {
         setMyListings(listingsData.map(item => ({
@@ -65,7 +67,7 @@ const Dashboard = () => {
             listing_images (url)
           )
         `)
-        .eq('user_id', parseInt(user?.id || '0'));
+        .eq('user_id', userId);
 
       if (wishlistData) {
         setWishlist(wishlistData.map(item => ({
@@ -93,7 +95,7 @@ const Dashboard = () => {
           *,
           listings (title, id)
         `)
-        .or(`sender_id.eq.${parseInt(user?.id || '0')},receiver_id.eq.${parseInt(user?.id || '0')}`)
+        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
         .order('created_at', { ascending: false });
 
       if (enquiriesData) {
