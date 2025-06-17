@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GitCompare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -11,23 +11,29 @@ interface CompareButtonProps {
 
 const CompareButton = ({ vehicleId, vehicleData }: CompareButtonProps) => {
   const [isInCompare, setIsInCompare] = useState(false);
+  const [compareCount, setCompareCount] = useState(0);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
+    setIsInCompare(compareList.some((item: any) => item.id === vehicleId));
+    setCompareCount(compareList.length);
+  }, [vehicleId]);
 
   const handleCompareToggle = () => {
     const compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
     
     if (isInCompare) {
-      // Remove from compare
       const updatedList = compareList.filter((item: any) => item.id !== vehicleId);
       localStorage.setItem('compareList', JSON.stringify(updatedList));
       setIsInCompare(false);
+      setCompareCount(updatedList.length);
       
       toast({
         title: "Removed from comparison",
         description: "Vehicle removed from compare list.",
       });
     } else {
-      // Add to compare (max 3 items)
       if (compareList.length >= 3) {
         toast({
           title: "Compare limit reached",
@@ -40,12 +46,16 @@ const CompareButton = ({ vehicleId, vehicleData }: CompareButtonProps) => {
       const updatedList = [...compareList, { id: vehicleId, ...vehicleData }];
       localStorage.setItem('compareList', JSON.stringify(updatedList));
       setIsInCompare(true);
+      setCompareCount(updatedList.length);
       
       toast({
         title: "Added to comparison",
         description: `Vehicle added to compare list (${updatedList.length}/3).`,
       });
     }
+
+    // Dispatch custom event to update compare page
+    window.dispatchEvent(new Event('compareListUpdated'));
   };
 
   return (

@@ -1,7 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
+import ContactModal from '@/components/ContactModal';
 import { 
   Calendar, Gauge, Fuel, Car, MapPin, Heart, Share2, 
   Phone, MessageCircle, Shield, Star, ChevronLeft, ChevronRight 
@@ -11,101 +12,171 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import VehicleCard from '@/components/VehicleCard';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import WishlistButton from '@/components/WishlistButton';
+
+interface VehicleListing {
+  id: number;
+  title: string;
+  make: string;
+  model: string;
+  price: number;
+  year: number;
+  mileage: number;
+  fuel_type: string;
+  transmission: string;
+  condition: string;
+  color: string;
+  region: string;
+  township: string;
+  seller_type: string;
+  description: string;
+  owner_id: string;
+  listing_images: { url: string }[];
+}
 
 const VehicleDetail = () => {
   const { id } = useParams();
+  const [vehicle, setVehicle] = useState<VehicleListing | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [contactModal, setContactModal] = useState<{ isOpen: boolean; type: 'call' | 'message' | 'loan' | null }>({
+    isOpen: false,
+    type: null
+  });
+  const [similarVehicles, setSimilarVehicles] = useState<any[]>([]);
+  const { toast } = useToast();
 
-  // Mock vehicle data
-  const vehicle = {
-    id: '1',
-    title: 'Toyota Camry 2020 Hybrid',
-    price: '350',
-    year: 2020,
-    make: 'Toyota',
-    model: 'Camry',
-    variant: 'Hybrid LE',
-    mileage: '25,000 km',
-    fuel: 'Hybrid',
-    transmission: 'CVT',
-    engine: '2.5L 4-Cylinder',
-    condition: 'Excellent',
-    bodyType: 'Sedan',
-    color: 'Pearl White',
-    location: 'Yangon',
-    doors: 4,
-    seats: 5,
-    seller: {
-      type: 'Dealer' as const,
-      name: 'Elite Motors Myanmar',
-      verified: true,
-      rating: 4.8,
-      reviews: 234,
-      phone: '+95 9 123 456 789',
-      address: 'No. 123, Pyay Road, Kamayut Township, Yangon'
-    },
-    images: [
-      '/placeholder.svg',
-      '/placeholder.svg',
-      '/placeholder.svg',
-      '/placeholder.svg',
-      '/placeholder.svg'
-    ],
-    features: [
-      'Air Conditioning',
-      'Power Steering',
-      'ABS',
-      'Airbags',
-      'Electric Windows',
-      'Central Locking',
-      'Bluetooth',
-      'Backup Camera',
-      'Lane Keeping Assist',
-      'Adaptive Cruise Control'
-    ],
-    description: 'This 2020 Toyota Camry Hybrid is in excellent condition with low mileage. Well maintained by the previous owner with full service history. Perfect for city driving with excellent fuel economy.',
-    serviceHistory: 'Full dealer service history available',
-    insuranceStatus: 'Valid until March 2025'
+  useEffect(() => {
+    if (id) {
+      fetchVehicleDetails();
+    }
+  }, [id]);
+
+  const fetchVehicleDetails = async () => {
+    try {
+      const { data: vehicleData, error } = await supabase
+        .from('listings')
+        .select(`
+          *,
+          listing_images (url)
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+
+      setVehicle(vehicleData);
+      
+      // Fetch similar vehicles
+      const { data: similarData } = await supabase
+        .from('listings')
+        .select(`
+          *,
+          listing_images (url)
+        `)
+        .eq('make', vehicleData.make)
+        .neq('id', id)
+        .limit(3);
+
+      if (similarData) {
+        setSimilarVehicles(similarData.map(item => ({
+          id: item.id.toString(),
+          title: item.title,
+          price: `${item.price}`,
+          year: item.year,
+          mileage: `${item.mileage?.toLocaleString()} km`,
+          fuel: item.fuel_type,
+          transmission: item.transmission,
+          location: `${item.township}, ${item.region}`,
+          seller: { 
+            type: item.seller_type === 'Dealer' ? 'Dealer' : 'Private',
+            name: item.seller_type === 'Dealer' ? 'Dealer' : 'Private Seller',
+            verified: item.seller_type === 'Dealer'
+          },
+          images: item.listing_images?.map((img: any) => img.url) || ['/placeholder.svg']
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching vehicle details:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load vehicle details.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const similarVehicles = [
-    {
-      id: '2',
-      title: 'Honda Accord 2019 Hybrid',
-      price: '320',
-      year: 2019,
-      mileage: '30,000 km',
-      fuel: 'Hybrid',
-      transmission: 'CVT',
-      location: 'Yangon',
-      seller: { type: 'Dealer' as const, name: 'Honda Center', verified: true },
-      images: ['/placeholder.svg']
-    },
-    {
-      id: '3',
-      title: 'Toyota Camry 2019',
-      price: '280',
-      year: 2019,
-      mileage: '35,000 km',
-      fuel: 'Petrol',
-      transmission: 'Automatic',
-      location: 'Mandalay',
-      seller: { type: 'Private' as const, name: 'John Doe', verified: false },
-      images: ['/placeholder.svg']
-    }
-  ];
-
   const nextImage = () => {
-    setCurrentImageIndex((prev) => 
-      prev === vehicle.images.length - 1 ? 0 : prev + 1
-    );
+    if (vehicle?.listing_images) {
+      setCurrentImageIndex((prev) => 
+        prev === vehicle.listing_images.length - 1 ? 0 : prev + 1
+      );
+    }
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => 
-      prev === 0 ? vehicle.images.length - 1 : prev - 1
-    );
+    if (vehicle?.listing_images) {
+      setCurrentImageIndex((prev) => 
+        prev === 0 ? vehicle.listing_images.length - 1 : prev - 1
+      );
+    }
   };
+
+  const handleContact = (type: 'call' | 'message' | 'loan') => {
+    setContactModal({ isOpen: true, type });
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: vehicle?.title,
+        text: `Check out this ${vehicle?.title} for ${vehicle?.price} Lakhs Ks`,
+        url: window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link copied",
+        description: "Vehicle link copied to clipboard.",
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-lg">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!vehicle) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-2">Vehicle Not Found</h2>
+            <p className="text-gray-600 mb-4">The vehicle you're looking for doesn't exist.</p>
+            <Link to="/">
+              <Button>Back to Home</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const images = vehicle.listing_images?.length > 0 
+    ? vehicle.listing_images 
+    : [{ url: '/placeholder.svg' }];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -119,59 +190,59 @@ const VehicleDetail = () => {
             <Card className="overflow-hidden">
               <div className="relative aspect-[16/10]">
                 <img 
-                  src={vehicle.images[currentImageIndex]}
+                  src={images[currentImageIndex]?.url || '/placeholder.svg'}
                   alt={vehicle.title}
                   className="w-full h-full object-cover"
                 />
                 
-                {/* Navigation Arrows */}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
+                {images.length > 1 && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={prevImage}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={nextImage}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </>
+                )}
 
-                {/* Image Counter */}
                 <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-lg text-sm">
-                  {currentImageIndex + 1} / {vehicle.images.length}
+                  {currentImageIndex + 1} / {images.length}
                 </div>
 
-                {/* Actions */}
                 <div className="absolute top-4 right-4 flex gap-2">
-                  <Button size="sm" variant="outline" className="bg-white/80 hover:bg-white/90">
-                    <Heart className="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="outline" className="bg-white/80 hover:bg-white/90">
+                  <WishlistButton vehicleId={vehicle.id.toString()} />
+                  <Button size="sm" variant="outline" onClick={handleShare} className="bg-white/80 hover:bg-white/90">
                     <Share2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
 
-              {/* Thumbnail Strip */}
-              <div className="p-4 flex gap-2 overflow-x-auto">
-                {vehicle.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentImageIndex(index)}
-                    className={`flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 ${
-                      index === currentImageIndex ? 'border-blue-500' : 'border-gray-200'
-                    }`}
-                  >
-                    <img src={image} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
+              {images.length > 1 && (
+                <div className="p-4 flex gap-2 overflow-x-auto">
+                  {images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 ${
+                        index === currentImageIndex ? 'border-blue-500' : 'border-gray-200'
+                      }`}
+                    >
+                      <img src={image.url} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </Card>
 
             {/* Vehicle Info */}
@@ -183,17 +254,11 @@ const VehicleDetail = () => {
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="flex items-center gap-1">
                         <MapPin className="w-4 h-4" />
-                        {vehicle.location}
+                        {vehicle.township}, {vehicle.region}
                       </span>
-                      <Badge variant={vehicle.seller.type === 'Dealer' ? 'default' : 'secondary'}>
-                        {vehicle.seller.type}
+                      <Badge variant={vehicle.seller_type === 'Dealer' ? 'default' : 'secondary'}>
+                        {vehicle.seller_type}
                       </Badge>
-                      {vehicle.seller.verified && (
-                        <Badge className="bg-green-100 text-green-700 border-green-200">
-                          <Shield className="w-3 h-3 mr-1" />
-                          Verified
-                        </Badge>
-                      )}
                     </div>
                   </div>
                   <div className="text-right">
@@ -212,12 +277,12 @@ const VehicleDetail = () => {
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
                     <Gauge className="w-5 h-5 mx-auto mb-2 text-gray-600" />
                     <div className="text-sm text-gray-600">Mileage</div>
-                    <div className="font-semibold">{vehicle.mileage}</div>
+                    <div className="font-semibold">{vehicle.mileage?.toLocaleString()} km</div>
                   </div>
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
                     <Fuel className="w-5 h-5 mx-auto mb-2 text-gray-600" />
                     <div className="text-sm text-gray-600">Fuel</div>
-                    <div className="font-semibold">{vehicle.fuel}</div>
+                    <div className="font-semibold">{vehicle.fuel_type}</div>
                   </div>
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
                     <Car className="w-5 h-5 mx-auto mb-2 text-gray-600" />
@@ -228,13 +293,11 @@ const VehicleDetail = () => {
 
                 <Separator className="my-6" />
 
-                {/* Description */}
                 <div className="mb-6">
                   <h3 className="font-semibold mb-2">Description</h3>
                   <p className="text-gray-600">{vehicle.description}</p>
                 </div>
 
-                {/* Specifications Table */}
                 <div className="mb-6">
                   <h3 className="font-semibold mb-4">Specifications</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -248,16 +311,8 @@ const VehicleDetail = () => {
                         <span className="font-medium">{vehicle.model}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Variant</span>
-                        <span className="font-medium">{vehicle.variant}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Engine</span>
-                        <span className="font-medium">{vehicle.engine}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Body Type</span>
-                        <span className="font-medium">{vehicle.bodyType}</span>
+                        <span className="text-gray-600">Condition</span>
+                        <span className="font-medium">{vehicle.condition}</span>
                       </div>
                     </div>
                     <div className="space-y-3">
@@ -266,35 +321,10 @@ const VehicleDetail = () => {
                         <span className="font-medium">{vehicle.color}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Doors</span>
-                        <span className="font-medium">{vehicle.doors}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Seats</span>
-                        <span className="font-medium">{vehicle.seats}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Condition</span>
-                        <span className="font-medium">{vehicle.condition}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Insurance</span>
-                        <span className="font-medium">{vehicle.insuranceStatus}</span>
+                        <span className="text-gray-600">Seller Type</span>
+                        <span className="font-medium">{vehicle.seller_type}</span>
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                {/* Features */}
-                <div>
-                  <h3 className="font-semibold mb-4">Features</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {vehicle.features.map((feature) => (
-                      <div key={feature} className="flex items-center gap-2 text-sm">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <span>{feature}</span>
-                      </div>
-                    ))}
                   </div>
                 </div>
               </CardContent>
@@ -306,36 +336,22 @@ const VehicleDetail = () => {
             {/* Seller Info */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Seller Information</CardTitle>
+                <CardTitle className="text-lg">Contact Seller</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold">{vehicle.seller.name}</h4>
-                    {vehicle.seller.verified && (
-                      <Badge className="bg-green-100 text-green-700 border-green-200">
-                        <Shield className="w-3 h-3 mr-1" />
-                        Verified
-                      </Badge>
-                    )}
-                  </div>
-                  {vehicle.seller.type === 'Dealer' && (
-                    <div className="flex items-center gap-1 text-sm text-gray-600 mb-2">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span>{vehicle.seller.rating} ({vehicle.seller.reviews} reviews)</span>
-                    </div>
-                  )}
-                  <p className="text-sm text-gray-600">{vehicle.seller.address}</p>
-                </div>
-
-                <Separator />
-
                 <div className="space-y-3">
-                  <Button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                    onClick={() => handleContact('call')}
+                  >
                     <Phone className="w-4 h-4 mr-2" />
-                    Call Seller
+                    Request Call Back
                   </Button>
-                  <Button variant="outline" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => handleContact('message')}
+                  >
                     <MessageCircle className="w-4 h-4 mr-2" />
                     Send Message
                   </Button>
@@ -351,44 +367,45 @@ const VehicleDetail = () => {
               <CardContent className="space-y-4">
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
                   <div className="text-sm text-gray-600 mb-1">Estimated Monthly Payment</div>
-                  <div className="text-2xl font-bold text-blue-600">2.8 Lakhs Ks</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {Math.round(vehicle.price * 0.008)} Lakhs Ks
+                  </div>
                   <div className="text-xs text-gray-500">Based on 20% down payment, 5 years</div>
                 </div>
-                <Button variant="outline" className="w-full">
-                  Calculate Your Loan
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => handleContact('loan')}
+                >
+                  Get Loan Quote
                 </Button>
-              </CardContent>
-            </Card>
-
-            {/* Safety Note */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <Shield className="w-5 h-5 text-orange-500 mt-0.5" />
-                  <div className="text-sm">
-                    <div className="font-medium text-gray-900 mb-1">Safety Tips</div>
-                    <div className="text-gray-600">
-                      Always inspect the vehicle in person and verify documents before making payment.
-                    </div>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </div>
         </div>
 
         {/* Similar Vehicles */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Similar Vehicles</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {similarVehicles.map((vehicle) => (
-              <VehicleCard key={vehicle.id} {...vehicle} />
-            ))}
+        {similarVehicles.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Similar Vehicles</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {similarVehicles.map((vehicle) => (
+                <VehicleCard key={vehicle.id} {...vehicle} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Mobile Navigation Spacing */}
+      <ContactModal
+        isOpen={contactModal.isOpen}
+        onClose={() => setContactModal({ isOpen: false, type: null })}
+        vehicleId={vehicle.id.toString()}
+        sellerId={vehicle.owner_id}
+        vehicleTitle={vehicle.title}
+        enquiryType={contactModal.type!}
+      />
+
       <div className="pb-20 md:pb-0"></div>
     </div>
   );

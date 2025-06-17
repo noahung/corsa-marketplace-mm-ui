@@ -17,6 +17,7 @@ import Cars from "./pages/Cars";
 import Motorbikes from "./pages/Motorbikes";
 import Dealers from "./pages/Dealers";
 import Sell from "./pages/Sell";
+import Compare from "./pages/Compare";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,10 +38,11 @@ const App = () => (
             <Route path="/motorbikes" element={<Motorbikes />} />
             <Route path="/dealers" element={<Dealers />} />
             <Route path="/vehicle/:id" element={<VehicleDetail />} />
-            <Route path="/sell" element={<PostVehicle />} />
+            <Route path="/sell" element={<Sell />} />
             <Route path="/post-vehicle" element={<PostVehicle />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/compare" element={<Compare />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
