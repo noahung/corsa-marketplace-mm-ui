@@ -1,15 +1,19 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Car } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,6 +21,16 @@ const Register = () => {
     role: '',
     agreeTerms: false
   });
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -30,15 +44,75 @@ const Register = () => {
     setFormData(prev => ({ ...prev, role: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Registration attempt:', formData);
-    // Handle registration logic here
+    setLoading(true);
+
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            full_name: formData.name,
+            role: formData.role
+          }
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Registration Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Check your email!",
+          description: "We've sent you a confirmation link to complete your registration.",
+        });
+        navigate('/login');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleGoogleSignup = () => {
-    console.log('Google signup clicked');
-    // Handle Google OAuth
+  const handleGoogleSignup = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Google Sign Up Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,6 +150,7 @@ const Register = () => {
                   placeholder="Enter your full name"
                   className="pl-10 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -96,6 +171,7 @@ const Register = () => {
                   placeholder="Enter your email"
                   className="pl-10 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -116,11 +192,13 @@ const Register = () => {
                   placeholder="Create a strong password"
                   className="pl-10 pr-10 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  disabled={loading}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -132,7 +210,7 @@ const Register = () => {
               <Label className="text-sm font-medium text-gray-700">
                 I want to
               </Label>
-              <Select value={formData.role} onValueChange={handleRoleChange}>
+              <Select value={formData.role} onValueChange={handleRoleChange} disabled={loading}>
                 <SelectTrigger className="rounded-xl border-gray-200">
                   <SelectValue placeholder="Select your role" />
                 </SelectTrigger>
@@ -155,6 +233,7 @@ const Register = () => {
                 onChange={handleInputChange}
                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 mt-1"
                 required
+                disabled={loading}
               />
               <label htmlFor="agreeTerms" className="ml-2 text-sm text-gray-600">
                 I agree to Corsa's{' '}
@@ -171,9 +250,10 @@ const Register = () => {
             {/* Sign Up Button */}
             <Button 
               type="submit"
+              disabled={loading || !formData.agreeTerms}
               className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 rounded-xl font-medium"
             >
-              Create Account
+              {loading ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>
 
@@ -191,6 +271,7 @@ const Register = () => {
             type="button"
             variant="outline"
             onClick={handleGoogleSignup}
+            disabled={loading}
             className="w-full py-3 rounded-xl border-gray-200 hover:bg-gray-50"
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">

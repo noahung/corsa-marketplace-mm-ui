@@ -1,13 +1,22 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Menu, X, User, Plus, Home, Car, Users } from 'lucide-react';
+import { Search, Menu, X, User, Plus, Home, Car, Users, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const navItems = [
     { name: 'Home', href: '/', icon: Home },
@@ -17,6 +26,10 @@ const Navigation = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <>
@@ -61,12 +74,37 @@ const Navigation = () => {
                   Sell Vehicle
                 </Button>
               </Link>
-              <Link to="/login">
-                <Button variant="outline" className="rounded-lg">
-                  <User className="w-4 h-4 mr-2" />
-                  Sign In
-                </Button>
-              </Link>
+              
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="rounded-lg">
+                      <User className="w-4 h-4 mr-2" />
+                      {user.user_metadata?.full_name || user.email?.split('@')[0] || 'Account'}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard" className="flex items-center">
+                        <User className="w-4 h-4 mr-2" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link to="/login">
+                  <Button variant="outline" className="rounded-lg">
+                    <User className="w-4 h-4 mr-2" />
+                    Sign In
+                  </Button>
+                </Link>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -103,12 +141,35 @@ const Navigation = () => {
                         Sell Vehicle
                       </Button>
                     </Link>
-                    <Link to="/login" onClick={() => setIsOpen(false)}>
-                      <Button variant="outline" className="w-full rounded-lg">
-                        <User className="w-4 h-4 mr-2" />
-                        Sign In
-                      </Button>
-                    </Link>
+                    
+                    {user ? (
+                      <>
+                        <Link to="/dashboard" onClick={() => setIsOpen(false)}>
+                          <Button variant="outline" className="w-full rounded-lg">
+                            <User className="w-4 h-4 mr-2" />
+                            Dashboard
+                          </Button>
+                        </Link>
+                        <Button 
+                          variant="outline" 
+                          className="w-full rounded-lg text-red-600 border-red-200 hover:bg-red-50"
+                          onClick={() => {
+                            handleSignOut();
+                            setIsOpen(false);
+                          }}
+                        >
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sign Out
+                        </Button>
+                      </>
+                    ) : (
+                      <Link to="/login" onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full rounded-lg">
+                          <User className="w-4 h-4 mr-2" />
+                          Sign In
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </div>
               </SheetContent>

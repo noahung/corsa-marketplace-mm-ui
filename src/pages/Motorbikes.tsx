@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navigation from '@/components/Navigation';
 import VehicleCard from '@/components/VehicleCard';
@@ -6,6 +5,7 @@ import SearchFilters from '@/components/SearchFilters';
 import { Grid, List, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Footer from '@/components/Footer';
 
 const Motorbikes = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -175,6 +175,8 @@ const Motorbikes = () => {
 
       {/* Mobile Navigation Spacing */}
       <div className="pb-20 md:pb-0"></div>
+      
+      <Footer />
     </div>
   );
 };

@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Calendar, Gauge, Fuel, Eye, Heart } from 'lucide-react';
+import { MapPin, Calendar, Gauge, Fuel, Eye, Share2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import WishlistButton from './WishlistButton';
+import CompareButton from './CompareButton';
 
 interface VehicleCardProps {
   id: string;
@@ -38,6 +40,23 @@ const VehicleCard = ({
   featured = false,
   className = '' 
 }: VehicleCardProps) => {
+  
+  const vehicleData = {
+    title, price, year, mileage, fuel, transmission, location, seller, images
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title,
+        text: `Check out this ${title} for ${price} Ks`,
+        url: `${window.location.origin}/vehicle/${id}`
+      });
+    } else {
+      navigator.clipboard.writeText(`${window.location.origin}/vehicle/${id}`);
+    }
+  };
+
   return (
     <div className={`bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300 ${featured ? 'ring-2 ring-blue-100' : ''} ${className}`}>
       {/* Image */}
@@ -64,9 +83,15 @@ const VehicleCard = ({
         </div>
 
         {/* Quick Actions */}
-        <div className="absolute top-3 right-3 flex gap-2">
-          <Button size="sm" variant="ghost" className="w-8 h-8 p-0 bg-white/80 hover:bg-white/90 backdrop-blur-sm">
-            <Heart className="w-4 h-4" />
+        <div className="absolute top-3 right-3 flex flex-col gap-2">
+          <WishlistButton vehicleId={id} />
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={handleShare}
+            className="w-8 h-8 p-0 bg-white/80 hover:bg-white/90 backdrop-blur-sm"
+          >
+            <Share2 className="w-4 h-4" />
           </Button>
         </div>
 
@@ -124,6 +149,7 @@ const VehicleCard = ({
               View Details
             </Button>
           </Link>
+          <CompareButton vehicleId={id} vehicleData={vehicleData} />
         </div>
       </div>
     </div>
