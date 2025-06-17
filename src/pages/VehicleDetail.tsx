@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
@@ -32,7 +31,7 @@ interface VehicleListing {
   township: string;
   seller_type: string;
   description: string;
-  owner_id: string;
+  owner_id: number; // Changed to number to match database
   listing_images: { url: string }[];
 }
 
@@ -62,7 +61,7 @@ const VehicleDetail = () => {
           *,
           listing_images (url)
         `)
-        .eq('id', id)
+        .eq('id', parseInt(id!)) // Convert string to number
         .single();
 
       if (error) throw error;
@@ -77,7 +76,7 @@ const VehicleDetail = () => {
           listing_images (url)
         `)
         .eq('make', vehicleData.make)
-        .neq('id', id)
+        .neq('id', parseInt(id!)) // Convert string to number
         .limit(3);
 
       if (similarData) {
@@ -401,7 +400,7 @@ const VehicleDetail = () => {
         isOpen={contactModal.isOpen}
         onClose={() => setContactModal({ isOpen: false, type: null })}
         vehicleId={vehicle.id.toString()}
-        sellerId={vehicle.owner_id}
+        sellerId={vehicle.owner_id.toString()} // Convert number to string
         vehicleTitle={vehicle.title}
         enquiryType={contactModal.type!}
       />
