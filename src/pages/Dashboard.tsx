@@ -34,7 +34,7 @@ const Dashboard = () => {
           *,
           listing_images (url)
         `)
-        .eq('owner_id', user?.id);
+        .eq('owner_id', parseInt(user?.id || '0'));
 
       if (listingsData) {
         setMyListings(listingsData.map(item => ({
@@ -55,9 +55,9 @@ const Dashboard = () => {
         })));
       }
 
-      // Fetch wishlist
+      // Fetch wishlist using favorites table
       const { data: wishlistData } = await supabase
-        .from('wishlists')
+        .from('favorites')
         .select(`
           listing_id,
           listings (
@@ -65,11 +65,11 @@ const Dashboard = () => {
             listing_images (url)
           )
         `)
-        .eq('user_id', user?.id);
+        .eq('user_id', parseInt(user?.id || '0'));
 
       if (wishlistData) {
         setWishlist(wishlistData.map(item => ({
-          id: item.listings.id.toString(),
+          id: item.listing_id.toString(),
           title: item.listings.title,
           price: `${item.listings.price}`,
           year: item.listings.year,
@@ -86,15 +86,14 @@ const Dashboard = () => {
         })));
       }
 
-      // Fetch enquiries
+      // Fetch enquiries using chats table
       const { data: enquiriesData } = await supabase
-        .from('enquiries')
+        .from('chats')
         .select(`
           *,
-          listings (title, id),
-          profiles!enquiries_buyer_id_fkey (full_name)
+          listings (title, id)
         `)
-        .or(`buyer_id.eq.${user?.id},seller_id.eq.${user?.id}`)
+        .or(`sender_id.eq.${parseInt(user?.id || '0')},receiver_id.eq.${parseInt(user?.id || '0')}`)
         .order('created_at', { ascending: false });
 
       if (enquiriesData) {
@@ -157,7 +156,7 @@ const Dashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="enquiries" className="flex items-center gap-2">
               <MessageCircle className="w-4 h-4" />
-              Enquiries ({enquiries.length})
+              Messages ({enquiries.length})
             </TabsTrigger>
             <TabsTrigger value="stats" className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
@@ -220,7 +219,7 @@ const Dashboard = () => {
           </TabsContent>
 
           <TabsContent value="enquiries" className="space-y-6">
-            <h2 className="text-xl font-semibold">Enquiries</h2>
+            <h2 className="text-xl font-semibold">Messages</h2>
             
             {enquiries.length > 0 ? (
               <div className="space-y-4">
@@ -229,26 +228,20 @@ const Dashboard = () => {
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h3 className="font-semibold">{enquiry.listings?.title}</h3>
+                          <h3 className="font-semibold">{enquiry.listings?.title || 'Vehicle'}</h3>
                           <p className="text-sm text-gray-600">
-                            {enquiry.buyer_id === user.id ? 'Your enquiry' : `From: ${enquiry.profiles?.full_name || 'User'}`}
+                            {enquiry.sender_id === parseInt(user.id) ? 'Your message' : 'Received message'}
                           </p>
                         </div>
                         <div className="flex gap-2">
-                          <Badge variant={enquiry.status === 'new' ? 'default' : 'secondary'}>
-                            {enquiry.status}
-                          </Badge>
                           <Badge variant="outline">
-                            {enquiry.enquiry_type}
+                            Message
                           </Badge>
                         </div>
                       </div>
                       <p className="text-gray-700 mb-4">{enquiry.message}</p>
                       <div className="flex justify-between items-center text-sm text-gray-500">
                         <span>{new Date(enquiry.created_at).toLocaleDateString()}</span>
-                        {enquiry.phone && (
-                          <span>Phone: {enquiry.phone}</span>
-                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -258,8 +251,8 @@ const Dashboard = () => {
               <Card>
                 <CardContent className="p-8 text-center">
                   <MessageCircle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-semibold mb-2">No enquiries yet</h3>
-                  <p className="text-gray-600">Enquiries from buyers will appear here</p>
+                  <h3 className="text-lg font-semibold mb-2">No messages yet</h3>
+                  <p className="text-gray-600">Messages from buyers will appear here</p>
                 </CardContent>
               </Card>
             )}
@@ -289,7 +282,7 @@ const Dashboard = () => {
               
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm">Total Enquiries</CardTitle>
+                  <CardTitle className="text-sm">Total Messages</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">{enquiries.length}</div>

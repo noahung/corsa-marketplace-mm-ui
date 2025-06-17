@@ -23,9 +23,9 @@ export const useWishlist = () => {
     
     try {
       const { data, error } = await supabase
-        .from('wishlists')
+        .from('favorites')
         .select('listing_id')
-        .eq('user_id', user.id);
+        .eq('user_id', parseInt(user.id));
       
       if (error) throw error;
       
@@ -52,9 +52,9 @@ export const useWishlist = () => {
       
       if (isWishlisted) {
         const { error } = await supabase
-          .from('wishlists')
+          .from('favorites')
           .delete()
-          .eq('user_id', user.id)
+          .eq('user_id', parseInt(user.id))
           .eq('listing_id', parseInt(listingId));
         
         if (error) throw error;
@@ -66,9 +66,9 @@ export const useWishlist = () => {
         });
       } else {
         const { error } = await supabase
-          .from('wishlists')
+          .from('favorites')
           .insert({
-            user_id: user.id,
+            user_id: parseInt(user.id),
             listing_id: parseInt(listingId)
           });
         

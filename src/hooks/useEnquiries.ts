@@ -31,16 +31,14 @@ export const useEnquiries = () => {
     setLoading(true);
     
     try {
+      // For now, we'll use the chats table to store enquiries
       const { error } = await supabase
-        .from('enquiries')
+        .from('chats')
         .insert({
           listing_id: parseInt(params.listingId),
-          buyer_id: user.id,
-          seller_id: params.sellerId,
-          message: params.message,
-          phone: params.phone,
-          email: params.email,
-          enquiry_type: params.enquiryType
+          sender_id: parseInt(user.id),
+          receiver_id: parseInt(params.sellerId),
+          message: `${params.enquiryType.toUpperCase()}: ${params.message}${params.phone ? ` (Phone: ${params.phone})` : ''}${params.email ? ` (Email: ${params.email})` : ''}`
         });
       
       if (error) throw error;
