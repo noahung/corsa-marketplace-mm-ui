@@ -215,7 +215,7 @@ const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
               <SelectValue placeholder="Select make" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Makes</SelectItem>
+              <SelectItem value="all-makes">All Makes</SelectItem>
               {makes.map((make) => (
                 <SelectItem key={make} value={make.toLowerCase()}>
                   {make}
@@ -294,7 +294,7 @@ const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
               <SelectValue placeholder="Select condition" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Conditions</SelectItem>
+              <SelectItem value="all-conditions">All Conditions</SelectItem>
               {conditions.map((condition) => (
                 <SelectItem key={condition} value={condition.toLowerCase()}>
                   {condition}
@@ -316,7 +316,7 @@ const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
               <SelectValue placeholder="Select color" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Colors</SelectItem>
+              <SelectItem value="all-colors">All Colors</SelectItem>
               {colors.map((color) => (
                 <SelectItem key={color} value={color.toLowerCase()}>
                   {color}
@@ -338,7 +338,7 @@ const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
               <SelectValue placeholder="Select region" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Regions</SelectItem>
+              <SelectItem value="all-regions">All Regions</SelectItem>
               {regions.map((region) => (
                 <SelectItem key={region} value={region.toLowerCase()}>
                   {region}
