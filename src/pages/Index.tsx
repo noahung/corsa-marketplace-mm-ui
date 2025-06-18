@@ -5,7 +5,10 @@ import SearchBar from '@/components/SearchBar';
 import CategoryTabs from '@/components/CategoryTabs';
 import FeaturedVehicles from '@/components/FeaturedVehicles';
 import TrustedDealers from '@/components/TrustedDealers';
-import { ShieldCheck, Zap, Users } from 'lucide-react';
+import { ShieldCheck, Zap, Users, Calculator, CreditCard, BookOpen, Battery } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 const Index = () => {
   const handleSearch = (filters: any) => {
@@ -39,6 +42,30 @@ const Index = () => {
           {/* Search Bar */}
           <div className="max-w-4xl mx-auto mb-12">
             <SearchBar onSearch={handleSearch} />
+          </div>
+
+          {/* Quick Action Buttons */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto mb-12">
+            <Link to="/valuation">
+              <Button variant="outline" className="w-full h-16 flex items-center justify-center gap-3 hover:bg-blue-50 hover:border-blue-300">
+                <Calculator className="w-6 h-6 text-blue-600" />
+                <span className="font-medium">Value Your Car</span>
+              </Button>
+            </Link>
+            
+            <Link to="/finance">
+              <Button variant="outline" className="w-full h-16 flex items-center justify-center gap-3 hover:bg-green-50 hover:border-green-300">
+                <CreditCard className="w-6 h-6 text-green-600" />
+                <span className="font-medium">Get Finance</span>
+              </Button>
+            </Link>
+            
+            <Link to="/ev-hub">
+              <Button variant="outline" className="w-full h-16 flex items-center justify-center gap-3 hover:bg-purple-50 hover:border-purple-300">
+                <Battery className="w-6 h-6 text-purple-600" />
+                <span className="font-medium">Electric Vehicles</span>
+              </Button>
+            </Link>
           </div>
 
           {/* Trust Indicators */}
@@ -75,6 +102,62 @@ const Index = () => {
 
       {/* Featured Vehicles */}
       <FeaturedVehicles />
+
+      {/* Services Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+              Complete Automotive Services
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Everything you need for your vehicle journey in Myanmar
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Link to="/valuation">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="text-center p-6">
+                  <Calculator className="w-12 h-12 mx-auto mb-4 text-blue-600" />
+                  <h3 className="font-semibold mb-2">Free Valuation</h3>
+                  <p className="text-sm text-gray-600">Get instant vehicle valuations based on Myanmar market data</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link to="/finance">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="text-center p-6">
+                  <CreditCard className="w-12 h-12 mx-auto mb-4 text-green-600" />
+                  <h3 className="font-semibold mb-2">Finance & Insurance</h3>
+                  <p className="text-sm text-gray-600">Compare loans and insurance from trusted partners</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link to="/ev-hub">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="text-center p-6">
+                  <Battery className="w-12 h-12 mx-auto mb-4 text-purple-600" />
+                  <h3 className="font-semibold mb-2">EV Hub</h3>
+                  <p className="text-sm text-gray-600">Explore electric vehicles and charging stations in Myanmar</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link to="/advice">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="text-center p-6">
+                  <BookOpen className="w-12 h-12 mx-auto mb-4 text-orange-600" />
+                  <h3 className="font-semibold mb-2">Expert Advice</h3>
+                  <p className="text-sm text-gray-600">Get expert reviews and buying guides for informed decisions</p>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Trusted Dealers */}
       <TrustedDealers />

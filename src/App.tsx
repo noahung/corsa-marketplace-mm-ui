@@ -18,6 +18,10 @@ import Motorbikes from "./pages/Motorbikes";
 import Dealers from "./pages/Dealers";
 import Sell from "./pages/Sell";
 import Compare from "./pages/Compare";
+import ValuationPage from "./pages/ValuationPage";
+import FinanceInsurance from "./pages/FinanceInsurance";
+import EVHub from "./pages/EVHub";
+import Advice from "./pages/Advice";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +47,10 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/compare" element={<Compare />} />
+            <Route path="/valuation" element={<ValuationPage />} />
+            <Route path="/finance" element={<FinanceInsurance />} />
+            <Route path="/ev-hub" element={<EVHub />} />
+            <Route path="/advice" element={<Advice />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
