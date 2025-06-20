@@ -15,24 +15,24 @@ export type Database = {
           id: number
           listing_id: number | null
           message: string
-          receiver_id: number | null
-          sender_id: number | null
+          receiver_id: string | null
+          sender_id: string | null
         }
         Insert: {
           created_at?: string | null
           id?: number
           listing_id?: number | null
           message: string
-          receiver_id?: number | null
-          sender_id?: number | null
+          receiver_id?: string | null
+          sender_id?: string | null
         }
         Update: {
           created_at?: string | null
           id?: number
           listing_id?: number | null
           message?: string
-          receiver_id?: number | null
-          sender_id?: number | null
+          receiver_id?: string | null
+          sender_id?: string | null
         }
         Relationships: [
           {
@@ -42,20 +42,6 @@ export type Database = {
             referencedRelation: "listings"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "chats_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chats_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
         ]
       }
       compare_items: {
@@ -63,19 +49,19 @@ export type Database = {
           added_at: string | null
           id: number
           listing_id: number | null
-          user_id: number | null
+          user_id: string | null
         }
         Insert: {
           added_at?: string | null
           id?: number
           listing_id?: number | null
-          user_id?: number | null
+          user_id?: string | null
         }
         Update: {
           added_at?: string | null
           id?: number
           listing_id?: number | null
-          user_id?: number | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -85,13 +71,6 @@ export type Database = {
             referencedRelation: "listings"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "compare_items_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
         ]
       }
       dealers: {
@@ -99,45 +78,37 @@ export type Database = {
           created_at: string | null
           dealership_name: string | null
           logo_url: string | null
-          user_id: number
+          user_id: string
         }
         Insert: {
           created_at?: string | null
           dealership_name?: string | null
           logo_url?: string | null
-          user_id: number
+          user_id: string
         }
         Update: {
           created_at?: string | null
           dealership_name?: string | null
           logo_url?: string | null
-          user_id?: number
+          user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "dealers_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       favorites: {
         Row: {
           added_at: string | null
           listing_id: number
-          user_id: number
+          user_id: string
         }
         Insert: {
           added_at?: string | null
           listing_id: number
-          user_id: number
+          user_id: string
         }
         Update: {
           added_at?: string | null
           listing_id?: number
-          user_id?: number
+          user_id?: string
         }
         Relationships: [
           {
@@ -145,13 +116,6 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "favorites_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -195,7 +159,7 @@ export type Database = {
           make: string
           mileage: number | null
           model: string
-          owner_id: number
+          owner_id: string
           price: number
           region: string | null
           seller_type: string | null
@@ -216,7 +180,7 @@ export type Database = {
           make: string
           mileage?: number | null
           model: string
-          owner_id: number
+          owner_id: string
           price: number
           region?: string | null
           seller_type?: string | null
@@ -237,7 +201,7 @@ export type Database = {
           make?: string
           mileage?: number | null
           model?: string
-          owner_id?: number
+          owner_id?: string
           price?: number
           region?: string | null
           seller_type?: string | null
@@ -246,15 +210,31 @@ export type Database = {
           transmission?: string | null
           year?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "listings_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string
+          role: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          role?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       reports: {
         Row: {
@@ -262,21 +242,21 @@ export type Database = {
           id: number
           listing_id: number | null
           reason: string | null
-          reported_by: number | null
+          reported_by: string | null
         }
         Insert: {
           created_at?: string | null
           id?: number
           listing_id?: number | null
           reason?: string | null
-          reported_by?: number | null
+          reported_by?: string | null
         }
         Update: {
           created_at?: string | null
           id?: number
           listing_id?: number | null
           reason?: string | null
-          reported_by?: number | null
+          reported_by?: string | null
         }
         Relationships: [
           {
@@ -284,13 +264,6 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reports_reported_by_fkey"
-            columns: ["reported_by"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]

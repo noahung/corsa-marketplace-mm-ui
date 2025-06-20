@@ -23,7 +23,7 @@ const Register = () => {
   });
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signUp } = useAuth();
 
   // Redirect if already logged in
   useEffect(() => {
@@ -49,18 +49,9 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            full_name: formData.name,
-            role: formData.role
-          }
-        }
+      const { error } = await signUp(formData.email, formData.password, {
+        full_name: formData.name,
+        role: formData.role
       });
 
       if (error) {
@@ -93,7 +84,7 @@ const Register = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: `${window.location.origin}/corsa-vehicle-marketplace/`
         }
       });
 

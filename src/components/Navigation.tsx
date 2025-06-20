@@ -1,13 +1,17 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Menu, X, User, Car, Zap, Calculator, CreditCard, BookOpen } from 'lucide-react';
+import { Search, Menu, X, User, Car, Zap, Calculator, CreditCard, BookOpen, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -20,6 +24,22 @@ const Navigation = () => {
     { path: '/ev-hub', label: 'EV Hub', icon: Zap },
     { path: '/advice', label: 'Advice', icon: BookOpen },
   ];
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <>
@@ -69,12 +89,27 @@ const Navigation = () => {
                   Sell Your Car
                 </Button>
               </Link>
-              <Link to="/login">
-                <Button variant="outline" size="sm">
-                  <User className="w-4 h-4 mr-2" />
-                  Sign In
-                </Button>
-              </Link>
+              {user ? (
+                <div className="flex items-center space-x-2">
+                  <Link to="/dashboard">
+                    <Button variant="outline" size="sm">
+                      <User className="w-4 h-4 mr-2" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
+              ) : (
+                <Link to="/login">
+                  <Button variant="outline" size="sm">
+                    <User className="w-4 h-4 mr-2" />
+                    Sign In
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -132,12 +167,27 @@ const Navigation = () => {
                         Sell Your Car
                       </Button>
                     </Link>
-                    <Link to="/login" onClick={() => setIsOpen(false)}>
-                      <Button variant="outline" className="w-full mt-2">
-                        <User className="w-4 h-4 mr-2" />
-                        Sign In
-                      </Button>
-                    </Link>
+                    {user ? (
+                      <div className="space-y-2 mt-2">
+                        <Link to="/dashboard" onClick={() => setIsOpen(false)}>
+                          <Button variant="outline" className="w-full">
+                            <User className="w-4 h-4 mr-2" />
+                            Dashboard
+                          </Button>
+                        </Link>
+                        <Button variant="ghost" className="w-full" onClick={() => { handleSignOut(); setIsOpen(false); }}>
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sign Out
+                        </Button>
+                      </div>
+                    ) : (
+                      <Link to="/login" onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full mt-2">
+                          <User className="w-4 h-4 mr-2" />
+                          Sign In
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </div>
               </SheetContent>
@@ -186,13 +236,13 @@ const Navigation = () => {
             Sell
           </Link>
           <Link
-            to="/dashboard"
+            to={user ? "/dashboard" : "/login"}
             className={`flex flex-col items-center justify-center text-xs ${
-              isActive('/dashboard') ? 'text-blue-600' : 'text-gray-600'
+              isActive('/dashboard') || isActive('/login') ? 'text-blue-600' : 'text-gray-600'
             }`}
           >
             <User className="w-5 h-5 mb-1" />
-            Account
+            {user ? 'Account' : 'Sign In'}
           </Link>
         </div>
       </div>
