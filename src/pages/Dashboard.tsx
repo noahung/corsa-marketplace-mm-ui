@@ -27,7 +27,7 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const userId = parseInt(user?.id || '0');
+      const userId = user?.id;
       
       // Fetch user's listings
       const { data: listingsData } = await supabase

@@ -35,8 +35,8 @@ export const useEnquiries = () => {
         .from('chats')
         .insert({
           listing_id: parseInt(params.listingId),
-          sender_id: parseInt(user.id),
-          receiver_id: parseInt(params.sellerId),
+          sender_id: user.id,
+          receiver_id: params.sellerId,
           message: `${params.enquiryType.toUpperCase()}: ${params.message}${params.phone ? ` (Phone: ${params.phone})` : ''}${params.email ? ` (Email: ${params.email})` : ''}`
         });
       

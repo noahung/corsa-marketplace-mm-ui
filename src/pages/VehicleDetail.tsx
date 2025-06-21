@@ -31,7 +31,7 @@ interface VehicleListing {
   township: string;
   seller_type: string;
   description: string;
-  owner_id: number; // Changed to number to match database
+  owner_id: string; // Changed to string to match database UUID type
   listing_images: { url: string }[];
 }
 
