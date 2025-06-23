@@ -64,7 +64,14 @@ export const useFinancialRates = () => {
         .order('name');
 
       if (error) throw error;
-      setInstitutions(data || []);
+      
+      // Type assertion to ensure proper typing
+      const typedData = (data || []).map(item => ({
+        ...item,
+        type: item.type as 'bank' | 'insurance'
+      })) as FinancialInstitution[];
+      
+      setInstitutions(typedData);
     } catch (error) {
       console.error('Error fetching institutions:', error);
     }
@@ -82,7 +89,17 @@ export const useFinancialRates = () => {
         .order('min_rate');
 
       if (error) throw error;
-      setLoanRates(data || []);
+      
+      // Type assertion and transformation
+      const typedData = (data || []).map(item => ({
+        ...item,
+        institution: item.institution ? {
+          ...item.institution,
+          type: item.institution.type as 'bank' | 'insurance'
+        } : undefined
+      })) as LoanRate[];
+      
+      setLoanRates(typedData);
     } catch (error) {
       console.error('Error fetching loan rates:', error);
     }
@@ -100,7 +117,18 @@ export const useFinancialRates = () => {
         .order('base_premium_rate');
 
       if (error) throw error;
-      setInsuranceRates(data || []);
+      
+      // Type assertion and transformation
+      const typedData = (data || []).map(item => ({
+        ...item,
+        coverage_type: item.coverage_type as 'third_party' | 'comprehensive' | 'third_party_fire_theft',
+        institution: item.institution ? {
+          ...item.institution,
+          type: item.institution.type as 'bank' | 'insurance'
+        } : undefined
+      })) as InsuranceRate[];
+      
+      setInsuranceRates(typedData);
     } catch (error) {
       console.error('Error fetching insurance rates:', error);
     }
@@ -112,6 +140,8 @@ export const useFinancialRates = () => {
     termMonths: number
   ) => {
     const monthlyRate = annualRate / 100 / 12;
+    if (monthlyRate === 0) return Math.round(principal / termMonths);
+    
     const payment = (principal * monthlyRate * Math.pow(1 + monthlyRate, termMonths)) / 
                    (Math.pow(1 + monthlyRate, termMonths) - 1);
     return Math.round(payment);
