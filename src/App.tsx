@@ -13,6 +13,12 @@ import NotFound from './pages/NotFound';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from "@/components/ui/toaster"
 import AdminRates from './pages/AdminRates';
+import Cars from './pages/Cars';
+import Motorbikes from './pages/Motorbikes';
+import Dealers from './pages/Dealers';
+import ValuationPage from './pages/ValuationPage';
+import Advice from './pages/Advice';
+import EVHub from './pages/EVHub';
 
 function App() {
   return (
@@ -22,6 +28,12 @@ function App() {
           <Toaster />
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/cars" element={<Cars />} />
+            <Route path="/motorbikes" element={<Motorbikes />} />
+            <Route path="/dealers" element={<Dealers />} />
+            <Route path="/valuation" element={<ValuationPage />} />
+            <Route path="/advice" element={<Advice />} />
+            <Route path="/ev-hub" element={<EVHub />} />
             <Route path="/vehicle/:id" element={<VehicleDetail />} />
             <Route path="/search" element={<SearchResults />} />
             <Route path="/login" element={<Login />} />
