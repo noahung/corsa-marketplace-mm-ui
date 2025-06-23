@@ -14,7 +14,7 @@ const LoanCalculator = () => {
     vehiclePrice: '',
     downPayment: '',
     loanTerm: '60',
-    selectedBank: ''
+    selectedBank: 'all'
   });
   const [results, setResults] = useState<Array<{
     bankName: string;
@@ -36,9 +36,9 @@ const LoanCalculator = () => {
 
     if (!vehiclePrice || loanAmount <= 0) return;
 
-    const relevantRates = formData.selectedBank 
-      ? loanRates.filter(rate => rate.institution_id === formData.selectedBank)
-      : loanRates;
+    const relevantRates = formData.selectedBank === 'all'
+      ? loanRates
+      : loanRates.filter(rate => rate.institution_id === formData.selectedBank);
 
     const calculatedResults = relevantRates.map(rate => {
       // Use average of min and max rate for calculation
@@ -119,7 +119,7 @@ const LoanCalculator = () => {
               <SelectValue placeholder="Select a bank or compare all" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Compare all banks</SelectItem>
+              <SelectItem value="all">Compare all banks</SelectItem>
               {loanRates.map(rate => rate.institution).filter((inst, index, self) => 
                 inst && self.findIndex(i => i?.id === inst.id) === index
               ).map(institution => (
