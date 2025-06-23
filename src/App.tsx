@@ -1,63 +1,44 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import Home from './pages/Home';
+import ListingDetail from './pages/ListingDetail';
+import SearchResults from './pages/SearchResults';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Profile from './pages/Profile';
+import SellCar from './pages/SellCar';
+import FinanceInsurance from './pages/FinanceInsurance';
+import Contact from './pages/Contact';
+import About from './pages/About';
+import NotFound from './pages/NotFound';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { Toaster } from "@/components/ui/toaster"
+import AdminRates from './pages/AdminRates';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import SearchResults from "./pages/SearchResults";
-import VehicleDetail from "./pages/VehicleDetail";
-import PostVehicle from "./pages/PostVehicle";
-import Dashboard from "./pages/Dashboard";
-import Blog from "./pages/Blog";
-import Cars from "./pages/Cars";
-import Motorbikes from "./pages/Motorbikes";
-import Dealers from "./pages/Dealers";
-import Sell from "./pages/Sell";
-import Compare from "./pages/Compare";
-import ValuationPage from "./pages/ValuationPage";
-import FinanceInsurance from "./pages/FinanceInsurance";
-import EVHub from "./pages/EVHub";
-import Advice from "./pages/Advice";
-import NotFound from "./pages/NotFound";
-
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <div className="min-h-screen bg-gray-50">
+          <Toaster />
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/listings/:id" element={<ListingDetail />} />
+            <Route path="/search" element={<SearchResults />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/search" element={<SearchResults />} />
-            <Route path="/cars" element={<Cars />} />
-            <Route path="/motorbikes" element={<Motorbikes />} />
-            <Route path="/dealers" element={<Dealers />} />
-            <Route path="/vehicle/:id" element={<VehicleDetail />} />
-            <Route path="/sell" element={<Sell />} />
-            <Route path="/post-vehicle" element={<PostVehicle />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/compare" element={<Compare />} />
-            <Route path="/valuation" element={<ValuationPage />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/sell" element={<SellCar />} />
             <Route path="/finance" element={<FinanceInsurance />} />
-            <Route path="/ev-hub" element={<EVHub />} />
-            <Route path="/advice" element={<Advice />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/admin/rates" element={<AdminRates />} />
           </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+        </div>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
 
 export default App;

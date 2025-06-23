@@ -1,33 +1,19 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import Navigation from '@/components/Navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calculator, Shield, CreditCard, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CreditCard, Info } from 'lucide-react';
+import LoanCalculator from '@/components/LoanCalculator';
+import InsuranceCalculator from '@/components/InsuranceCalculator';
+import { useFinancialRates } from '@/hooks/useFinancialRates';
 
 const FinanceInsurance = () => {
-  const [loanData, setLoanData] = useState({
-    vehiclePrice: '',
-    downPayment: '',
-    loanTerm: '60',
-    interestRate: '8.5'
-  });
+  const { institutions, loanRates, insuranceRates } = useFinancialRates();
 
-  const [monthlyPayment, setMonthlyPayment] = useState(null);
-
-  const calculateLoan = () => {
-    const principal = parseFloat(loanData.vehiclePrice) - parseFloat(loanData.downPayment || '0');
-    const monthlyRate = parseFloat(loanData.interestRate) / 100 / 12;
-    const numPayments = parseInt(loanData.loanTerm);
-    
-    const payment = (principal * monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
-                   (Math.pow(1 + monthlyRate, numPayments) - 1);
-    
-    setMonthlyPayment(Math.round(payment));
-  };
+  const bankPartners = institutions.filter(inst => inst.type === 'bank');
+  const insurancePartners = institutions.filter(inst => inst.type === 'insurance');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -51,76 +37,8 @@ const FinanceInsurance = () => {
 
           <TabsContent value="finance" className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Loan Calculator */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calculator className="w-5 h-5" />
-                    Loan Calculator
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="vehiclePrice">Vehicle Price (Lakhs Ks)</Label>
-                    <Input
-                      id="vehiclePrice"
-                      type="number"
-                      placeholder="e.g. 300"
-                      value={loanData.vehiclePrice}
-                      onChange={(e) => setLoanData({...loanData, vehiclePrice: e.target.value})}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="downPayment">Down Payment (Lakhs Ks)</Label>
-                    <Input
-                      id="downPayment"
-                      type="number"
-                      placeholder="e.g. 60"
-                      value={loanData.downPayment}
-                      onChange={(e) => setLoanData({...loanData, downPayment: e.target.value})}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="loanTerm">Loan Term (months)</Label>
-                    <Input
-                      id="loanTerm"
-                      type="number"
-                      value={loanData.loanTerm}
-                      onChange={(e) => setLoanData({...loanData, loanTerm: e.target.value})}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="interestRate">Interest Rate (%)</Label>
-                    <Input
-                      id="interestRate"
-                      type="number"
-                      step="0.1"
-                      value={loanData.interestRate}
-                      onChange={(e) => setLoanData({...loanData, interestRate: e.target.value})}
-                    />
-                  </div>
-
-                  <Button 
-                    onClick={calculateLoan}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                    disabled={!loanData.vehiclePrice}
-                  >
-                    Calculate Monthly Payment
-                  </Button>
-
-                  {monthlyPayment && (
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-sm text-gray-600 mb-2">Estimated Monthly Payment</div>
-                      <div className="text-2xl font-bold text-blue-600">
-                        {monthlyPayment.toLocaleString()} Ks
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              {/* Enhanced Loan Calculator */}
+              <LoanCalculator />
 
               {/* Finance Partners */}
               <Card>
@@ -132,32 +50,33 @@ const FinanceInsurance = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold">CB Bank</h3>
-                        <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">8.5% APR</span>
+                    {bankPartners.map((bank) => {
+                      const bankRates = loanRates.filter(rate => rate.institution_id === bank.id);
+                      const bestRate = bankRates.length > 0 ? Math.min(...bankRates.map(r => r.min_rate)) : null;
+                      
+                      return (
+                        <div key={bank.id} className="border rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="font-semibold">{bank.name}</h3>
+                            {bestRate && (
+                              <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">
+                                From {bestRate}% APR
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">
+                            {bank.description || 'Competitive vehicle financing options'}
+                          </p>
+                          <Button variant="outline" size="sm" className="w-full">Get Quote</Button>
+                        </div>
+                      );
+                    })}
+                    
+                    {bankPartners.length === 0 && (
+                      <div className="text-center text-gray-500 py-8">
+                        <p>No partner banks available at the moment.</p>
                       </div>
-                      <p className="text-sm text-gray-600 mb-3">Competitive rates for new and used vehicles</p>
-                      <Button variant="outline" size="sm" className="w-full">Get Quote</Button>
-                    </div>
-
-                    <div className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold">KBZ Bank</h3>
-                        <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">9.0% APR</span>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-3">Flexible terms up to 7 years</p>
-                      <Button variant="outline" size="sm" className="w-full">Get Quote</Button>
-                    </div>
-
-                    <div className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold">AYA Bank</h3>
-                        <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">8.8% APR</span>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-3">Quick approval in 24 hours</p>
-                      <Button variant="outline" size="sm" className="w-full">Get Quote</Button>
-                    </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -197,40 +116,8 @@ const FinanceInsurance = () => {
 
           <TabsContent value="insurance" className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Insurance Quote Form */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="w-5 h-5" />
-                    Get Insurance Quote
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="vehicleValue">Vehicle Value (Lakhs Ks)</Label>
-                    <Input id="vehicleValue" type="number" placeholder="e.g. 300" />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="driverAge">Driver Age</Label>
-                    <Input id="driverAge" type="number" placeholder="e.g. 35" />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="location">Location</Label>
-                    <Input id="location" placeholder="e.g. Yangon" />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="coverageType">Coverage Type</Label>
-                    <Input id="coverageType" placeholder="Comprehensive" />
-                  </div>
-
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                    Get Instant Quote
-                  </Button>
-                </CardContent>
-              </Card>
+              {/* Enhanced Insurance Calculator */}
+              <InsuranceCalculator />
 
               {/* Insurance Partners */}
               <Card>
@@ -239,23 +126,33 @@ const FinanceInsurance = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="border rounded-lg p-4">
-                      <h3 className="font-semibold mb-2">Myanmar Insurance</h3>
-                      <p className="text-sm text-gray-600 mb-3">Comprehensive coverage with 24/7 support</p>
-                      <Button variant="outline" size="sm" className="w-full">Get Quote</Button>
-                    </div>
-
-                    <div className="border rounded-lg p-4">
-                      <h3 className="font-semibold mb-2">IKBZ Insurance</h3>
-                      <p className="text-sm text-gray-600 mb-3">Competitive rates for young drivers</p>
-                      <Button variant="outline" size="sm" className="w-full">Get Quote</Button>
-                    </div>
-
-                    <div className="border rounded-lg p-4">
-                      <h3 className="font-semibold mb-2">Grand Guardian</h3>
-                      <p className="text-sm text-gray-600 mb-3">Specialist in luxury vehicle insurance</p>
-                      <Button variant="outline" size="sm" className="w-full">Get Quote</Button>
-                    </div>
+                    {insurancePartners.map((company) => {
+                      const companyRates = insuranceRates.filter(rate => rate.institution_id === company.id);
+                      const comprehensiveRate = companyRates.find(r => r.coverage_type === 'comprehensive');
+                      
+                      return (
+                        <div key={company.id} className="border rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="font-semibold">{company.name}</h3>
+                            {comprehensiveRate && (
+                              <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                {(comprehensiveRate.base_premium_rate * 100).toFixed(1)}% of value
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">
+                            {company.description || 'Comprehensive vehicle insurance coverage'}
+                          </p>
+                          <Button variant="outline" size="sm" className="w-full">Get Quote</Button>
+                        </div>
+                      );
+                    })}
+                    
+                    {insurancePartners.length === 0 && (
+                      <div className="text-center text-gray-500 py-8">
+                        <p>No partner insurance companies available at the moment.</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

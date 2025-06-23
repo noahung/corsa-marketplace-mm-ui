@@ -120,6 +120,101 @@ export type Database = {
           },
         ]
       }
+      financial_institutions: {
+        Row: {
+          contact_info: Json | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          contact_info?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          contact_info?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      insurance_rates: {
+        Row: {
+          age_multipliers: Json | null
+          base_premium_rate: number
+          coverage_type: string
+          created_at: string
+          effective_from: string
+          effective_until: string | null
+          id: string
+          institution_id: string | null
+          is_active: boolean
+          location_multipliers: Json | null
+          max_premium: number | null
+          min_premium: number | null
+          updated_at: string
+          vehicle_age_multipliers: Json | null
+        }
+        Insert: {
+          age_multipliers?: Json | null
+          base_premium_rate: number
+          coverage_type: string
+          created_at?: string
+          effective_from?: string
+          effective_until?: string | null
+          id?: string
+          institution_id?: string | null
+          is_active?: boolean
+          location_multipliers?: Json | null
+          max_premium?: number | null
+          min_premium?: number | null
+          updated_at?: string
+          vehicle_age_multipliers?: Json | null
+        }
+        Update: {
+          age_multipliers?: Json | null
+          base_premium_rate?: number
+          coverage_type?: string
+          created_at?: string
+          effective_from?: string
+          effective_until?: string | null
+          id?: string
+          institution_id?: string | null
+          is_active?: boolean
+          location_multipliers?: Json | null
+          max_premium?: number | null
+          min_premium?: number | null
+          updated_at?: string
+          vehicle_age_multipliers?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_rates_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "financial_institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listing_images: {
         Row: {
           id: number
@@ -211,6 +306,74 @@ export type Database = {
           year?: number | null
         }
         Relationships: []
+      }
+      loan_rates: {
+        Row: {
+          created_at: string
+          effective_from: string
+          effective_until: string | null
+          id: string
+          institution_id: string | null
+          is_active: boolean
+          max_amount: number | null
+          max_rate: number
+          max_term_months: number
+          min_amount: number | null
+          min_down_payment_percent: number | null
+          min_rate: number
+          min_term_months: number
+          product_name: string
+          special_conditions: string | null
+          updated_at: string
+          vehicle_types: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          effective_from?: string
+          effective_until?: string | null
+          id?: string
+          institution_id?: string | null
+          is_active?: boolean
+          max_amount?: number | null
+          max_rate: number
+          max_term_months: number
+          min_amount?: number | null
+          min_down_payment_percent?: number | null
+          min_rate: number
+          min_term_months: number
+          product_name: string
+          special_conditions?: string | null
+          updated_at?: string
+          vehicle_types?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          effective_from?: string
+          effective_until?: string | null
+          id?: string
+          institution_id?: string | null
+          is_active?: boolean
+          max_amount?: number | null
+          max_rate?: number
+          max_term_months?: number
+          min_amount?: number | null
+          min_down_payment_percent?: number | null
+          min_rate?: number
+          min_term_months?: number
+          product_name?: string
+          special_conditions?: string | null
+          updated_at?: string
+          vehicle_types?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_rates_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "financial_institutions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
