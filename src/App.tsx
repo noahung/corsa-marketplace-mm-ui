@@ -25,7 +25,7 @@ import ChargingStationDetail from './pages/ChargingStationDetail';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/corsa-myanmar">
       <AuthProvider>
         <div className="min-h-screen bg-gray-50">
           <Toaster />
