@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import Index from './pages/Index';
@@ -19,6 +18,10 @@ import Dealers from './pages/Dealers';
 import ValuationPage from './pages/ValuationPage';
 import Advice from './pages/Advice';
 import EVHub from './pages/EVHub';
+import Blog from './pages/Blog';
+import BlogDetail from './pages/BlogDetail';
+import AdminCMS from './pages/AdminCMS';
+import ChargingStationDetail from './pages/ChargingStationDetail';
 
 function App() {
   return (
@@ -42,6 +45,10 @@ function App() {
             <Route path="/sell" element={<Sell />} />
             <Route path="/finance" element={<FinanceInsurance />} />
             <Route path="/admin/rates" element={<AdminRates />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:id" element={<BlogDetail />} />
+            <Route path="/admin/cms" element={<AdminCMS />} />
+            <Route path="/charging-station/:id" element={<ChargingStationDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

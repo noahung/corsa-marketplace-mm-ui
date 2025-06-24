@@ -9,6 +9,96 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      blog_posts: {
+        Row: {
+          author_id: string
+          author_name: string
+          category: string
+          content: string
+          created_at: string | null
+          excerpt: string | null
+          id: string
+          image_url: string | null
+          is_published: boolean | null
+          rating: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_id: string
+          author_name: string
+          category: string
+          content: string
+          created_at?: string | null
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean | null
+          rating?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string
+          author_name?: string
+          category?: string
+          content?: string
+          created_at?: string | null
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean | null
+          rating?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      charging_stations: {
+        Row: {
+          address: string
+          amenities: string[] | null
+          contact_info: Json | null
+          created_at: string | null
+          id: string
+          latitude: number
+          location: string
+          longitude: number
+          name: string
+          pricing: string | null
+          status: string
+          type: string
+        }
+        Insert: {
+          address: string
+          amenities?: string[] | null
+          contact_info?: Json | null
+          created_at?: string | null
+          id?: string
+          latitude: number
+          location: string
+          longitude: number
+          name: string
+          pricing?: string | null
+          status?: string
+          type: string
+        }
+        Update: {
+          address?: string
+          amenities?: string[] | null
+          contact_info?: Json | null
+          created_at?: string | null
+          id?: string
+          latitude?: number
+          location?: string
+          longitude?: number
+          name?: string
+          pricing?: string | null
+          status?: string
+          type?: string
+        }
+        Relationships: []
+      }
       chats: {
         Row: {
           created_at: string | null
@@ -431,6 +521,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           created_at: string
@@ -466,10 +577,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -584,6 +701,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const

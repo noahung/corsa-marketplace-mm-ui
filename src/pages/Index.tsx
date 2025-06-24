@@ -1,7 +1,8 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 import SearchBar from '@/components/SearchBar';
+import SearchFilters from '@/components/SearchFilters';
 import CategoryTabs from '@/components/CategoryTabs';
 import FeaturedVehicles from '@/components/FeaturedVehicles';
 import TrustedDealers from '@/components/TrustedDealers';
@@ -11,14 +12,40 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 const Index = () => {
-  const handleSearch = (filters: any) => {
-    console.log('Search filters:', filters);
-    // Navigate to search results page
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    make: '',
+    model: '',
+    minPrice: 0,
+    maxPrice: 10000,
+    minYear: 2000,
+    maxYear: 2024,
+    fuelType: '',
+    transmission: '',
+    location: ''
+  });
+
+  const handleFilterChange = (key: string, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleCategoryChange = (category: string) => {
-    console.log('Category changed:', category);
-    // Handle category navigation
+  const handleClearFilters = () => {
+    setFilters({
+      make: '',
+      model: '',
+      minPrice: 0,
+      maxPrice: 10000,
+      minYear: 2000,
+      maxYear: 2024,
+      fuelType: '',
+      transmission: '',
+      location: ''
+    });
+  };
+
+  const handleSearch = () => {
+    console.log('Searching with filters:', filters);
+    // Implement search logic here
   };
 
   return (
@@ -26,79 +53,46 @@ const Index = () => {
       <Navigation />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 via-white to-indigo-50 pt-8 pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Hero Content */}
-          <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
-              Find Your Perfect Vehicle in 
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-700"> Myanmar</span>
-            </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-              Discover thousands of cars and motorbikes from trusted dealers and private sellers across Myanmar.
-            </p>
-          </div>
-
-          {/* Search Bar */}
-          <div className="max-w-4xl mx-auto mb-12">
-            <SearchBar onSearch={handleSearch} />
-          </div>
-
-          {/* Quick Action Buttons */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto mb-12">
-            <Link to="/valuation">
-              <Button variant="outline" className="w-full h-16 flex items-center justify-center gap-3 hover:bg-blue-50 hover:border-blue-300">
-                <Calculator className="w-6 h-6 text-blue-600" />
-                <span className="font-medium">Value Your Car</span>
-              </Button>
-            </Link>
-            
-            <Link to="/finance">
-              <Button variant="outline" className="w-full h-16 flex items-center justify-center gap-3 hover:bg-green-50 hover:border-green-300">
-                <CreditCard className="w-6 h-6 text-green-600" />
-                <span className="font-medium">Get Finance</span>
-              </Button>
-            </Link>
-            
-            <Link to="/ev-hub">
-              <Button variant="outline" className="w-full h-16 flex items-center justify-center gap-3 hover:bg-purple-50 hover:border-purple-300">
-                <Battery className="w-6 h-6 text-purple-600" />
-                <span className="font-medium">Electric Vehicles</span>
-              </Button>
-            </Link>
-          </div>
-
-          {/* Trust Indicators */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl mx-auto mb-3 flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Verified Sellers</h3>
-              <p className="text-sm text-gray-600">All dealers and sellers are verified for your safety</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl mx-auto mb-3 flex items-center justify-center">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Instant Search</h3>
-              <p className="text-sm text-gray-600">Find your ideal vehicle in seconds with smart filters</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl mx-auto mb-3 flex items-center justify-center">
-                <Users className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Trusted Community</h3>
-              <p className="text-sm text-gray-600">Join thousands of satisfied buyers and sellers</p>
-            </div>
+      <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white py-20">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            Find Your Perfect
+            <span className="text-yellow-400"> Vehicle</span>
+          </h1>
+          <p className="text-xl md:text-2xl mb-8 text-blue-100">
+            Myanmar's trusted automotive marketplace
+          </p>
+          
+          <SearchBar />
+          
+          <div className="mt-6">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="text-blue-200 hover:text-white underline"
+            >
+              {showFilters ? 'Hide Advanced Filters' : 'Show Advanced Filters'}
+            </button>
           </div>
         </div>
       </section>
 
+      {/* Advanced Filters */}
+      {showFilters && (
+        <section className="py-8 bg-white border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <SearchFilters
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onClearFilters={handleClearFilters}
+              onSearch={handleSearch}
+            />
+          </div>
+        </section>
+      )}
+
       {/* Category Navigation */}
-      <CategoryTabs onCategoryChange={handleCategoryChange} />
+      <CategoryTabs />
 
       {/* Featured Vehicles */}
       <FeaturedVehicles />

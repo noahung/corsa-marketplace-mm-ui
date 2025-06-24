@@ -1,6 +1,7 @@
-
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -38,10 +39,34 @@ const EVHub = () => {
   ];
 
   const chargingStations = [
-    { name: 'Yangon City Mall', location: 'Yangon', type: 'Fast Charging', status: 'Available' },
-    { name: 'Junction Square', location: 'Yangon', type: 'Standard', status: 'Available' },
-    { name: 'Mandalay Bay', location: 'Mandalay', type: 'Fast Charging', status: 'Occupied' },
-    { name: 'Naypyitaw Plaza', location: 'Naypyitaw', type: 'Super Fast', status: 'Available' }
+    { 
+      id: '1',
+      name: 'Yangon City Mall', 
+      location: 'Yangon', 
+      type: 'Fast Charging', 
+      status: 'Available' 
+    },
+    { 
+      id: '2',
+      name: 'Junction Square', 
+      location: 'Yangon', 
+      type: 'Standard', 
+      status: 'Available' 
+    },
+    { 
+      id: '3',
+      name: 'Mandalay Bay', 
+      location: 'Mandalay', 
+      type: 'Fast Charging', 
+      status: 'Occupied' 
+    },
+    { 
+      id: '4',
+      name: 'Naypyitaw Plaza', 
+      location: 'Naypyitaw', 
+      type: 'Super Fast', 
+      status: 'Available' 
+    }
   ];
 
   return (
@@ -145,10 +170,16 @@ const EVHub = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {chargingStations.map((station, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                {chargingStations.map((station) => (
+                  <Link 
+                    key={station.id} 
+                    to={`/charging-station/${station.id}`}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                  >
                     <div>
-                      <h3 className="font-semibold">{station.name}</h3>
+                      <h3 className="font-semibold hover:text-blue-600 transition-colors">
+                        {station.name}
+                      </h3>
                       <p className="text-sm text-gray-600">{station.location} • {station.type}</p>
                     </div>
                     <Badge 
@@ -157,11 +188,13 @@ const EVHub = () => {
                     >
                       {station.status}
                     </Badge>
-                  </div>
+                  </Link>
                 ))}
               </div>
-              <Button className="w-full mt-4" variant="outline">
-                View All Stations on Map
+              <Button className="w-full mt-4" variant="outline" asChild>
+                <Link to="/charging-stations">
+                  View All Stations on Map
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -244,7 +277,7 @@ const EVHub = () => {
         </section>
       </div>
 
-      <div className="pb-20 md:pb-0"></div>
+      <Footer />
     </div>
   );
 };
