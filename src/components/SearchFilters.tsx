@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 
 interface SearchFiltersProps {
-  filters: {
+  filters?: {
     make: string;
     model: string;
     minPrice: number;
@@ -20,17 +20,63 @@ interface SearchFiltersProps {
     transmission: string;
     location: string;
   };
-  onFilterChange: (key: string, value: any) => void;
-  onClearFilters: () => void;
-  onSearch: () => void;
+  onFilterChange?: (key: string, value: any) => void;
+  onClearFilters?: () => void;
+  onSearch?: () => void;
 }
 
 const SearchFilters: React.FC<SearchFiltersProps> = ({
-  filters,
-  onFilterChange,
+  filters: externalFilters,
+  onFilterChange: externalOnFilterChange,
   onClearFilters,
   onSearch
 }) => {
+  const [internalFilters, setInternalFilters] = useState({
+    make: '',
+    model: '',
+    minPrice: 0,
+    maxPrice: 10000,
+    minYear: 2000,
+    maxYear: 2024,
+    fuelType: '',
+    transmission: '',
+    location: ''
+  });
+
+  const filters = externalFilters || internalFilters;
+  
+  const handleFilterChange = (key: string, value: any) => {
+    if (externalOnFilterChange) {
+      externalOnFilterChange(key, value);
+    } else {
+      setInternalFilters(prev => ({ ...prev, [key]: value }));
+    }
+  };
+
+  const handleClearFilters = () => {
+    if (onClearFilters) {
+      onClearFilters();
+    } else {
+      setInternalFilters({
+        make: '',
+        model: '',
+        minPrice: 0,
+        maxPrice: 10000,
+        minYear: 2000,
+        maxYear: 2024,
+        fuelType: '',
+        transmission: '',
+        location: ''
+      });
+    }
+  };
+
+  const handleSearch = () => {
+    if (onSearch) {
+      onSearch();
+    }
+  };
+
   const makes = ['Toyota', 'Honda', 'Nissan', 'Suzuki', 'Mazda', 'BMW', 'Mercedes-Benz', 'Audi'];
   const locations = ['Yangon', 'Mandalay', 'Naypyitaw', 'Mawlamyine', 'Taunggyi', 'Pathein'];
 
@@ -50,7 +96,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
           {activeFiltersCount > 0 && (
             <div className="flex items-center gap-2">
               <Badge variant="secondary">{activeFiltersCount} active</Badge>
-              <Button variant="ghost" size="sm" onClick={onClearFilters}>
+              <Button variant="ghost" size="sm" onClick={handleClearFilters}>
                 <X className="w-4 h-4 mr-1" />
                 Clear All
               </Button>
@@ -62,12 +108,12 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <label className="text-sm font-medium mb-2 block">Make</label>
-            <Select value={filters.make} onValueChange={(value) => onFilterChange('make', value)}>
+            <Select value={filters.make} onValueChange={(value) => handleFilterChange('make', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select make" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Makes</SelectItem>
+                <SelectItem value="">All Makes</SelectItem>
                 {makes.map((make) => (
                   <SelectItem key={make} value={make}>
                     {make}
@@ -82,18 +128,18 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
             <Input
               placeholder="Enter model"
               value={filters.model}
-              onChange={(e) => onFilterChange('model', e.target.value)}
+              onChange={(e) => handleFilterChange('model', e.target.value)}
             />
           </div>
 
           <div>
             <label className="text-sm font-medium mb-2 block">Location</label>
-            <Select value={filters.location} onValueChange={(value) => onFilterChange('location', value)}>
+            <Select value={filters.location} onValueChange={(value) => handleFilterChange('location', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select location" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
+                <SelectItem value="">All Locations</SelectItem>
                 {locations.map((location) => (
                   <SelectItem key={location} value={location}>
                     {location}
@@ -107,12 +153,12 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium mb-2 block">Fuel Type</label>
-            <Select value={filters.fuelType} onValueChange={(value) => onFilterChange('fuelType', value)}>
+            <Select value={filters.fuelType} onValueChange={(value) => handleFilterChange('fuelType', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select fuel type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="">All Types</SelectItem>
                 <SelectItem value="petrol">Petrol</SelectItem>
                 <SelectItem value="diesel">Diesel</SelectItem>
                 <SelectItem value="hybrid">Hybrid</SelectItem>
@@ -123,12 +169,12 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
 
           <div>
             <label className="text-sm font-medium mb-2 block">Transmission</label>
-            <Select value={filters.transmission} onValueChange={(value) => onFilterChange('transmission', value)}>
+            <Select value={filters.transmission} onValueChange={(value) => handleFilterChange('transmission', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select transmission" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="">All Types</SelectItem>
                 <SelectItem value="manual">Manual</SelectItem>
                 <SelectItem value="automatic">Automatic</SelectItem>
                 <SelectItem value="cvt">CVT</SelectItem>
@@ -144,8 +190,8 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
           <Slider
             value={[filters.minPrice, filters.maxPrice]}
             onValueChange={([min, max]) => {
-              onFilterChange('minPrice', min);
-              onFilterChange('maxPrice', max);
+              handleFilterChange('minPrice', min);
+              handleFilterChange('maxPrice', max);
             }}
             min={0}
             max={10000}
@@ -161,8 +207,8 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
           <Slider
             value={[filters.minYear, filters.maxYear]}
             onValueChange={([min, max]) => {
-              onFilterChange('minYear', min);
-              onFilterChange('maxYear', max);
+              handleFilterChange('minYear', min);
+              handleFilterChange('maxYear', max);
             }}
             min={2000}
             max={2024}
@@ -171,9 +217,11 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
           />
         </div>
 
-        <Button onClick={onSearch} className="w-full bg-blue-600 hover:bg-blue-700">
-          Search Vehicles
-        </Button>
+        {onSearch && (
+          <Button onClick={handleSearch} className="w-full bg-blue-600 hover:bg-blue-700">
+            Search Vehicles
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
