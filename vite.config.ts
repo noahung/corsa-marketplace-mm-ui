@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: '/corsa-myanmar/', // Set base for GitHub Pages deployment
+  base: '/corsa-marketplace-mm-ui/', // Set base for GitHub Pages deployment
   server: {
     host: "::",
     port: 8080,

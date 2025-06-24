@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import Index from './pages/Index';
 import VehicleDetail from './pages/VehicleDetail';
 import SearchResults from './pages/SearchResults';
@@ -25,7 +25,7 @@ import ChargingStationDetail from './pages/ChargingStationDetail';
 
 function App() {
   return (
-    <BrowserRouter basename="/corsa-myanmar">
+    <HashRouter basename="/corsa-myanmar">
       <AuthProvider>
         <div className="min-h-screen bg-gray-50">
           <Toaster />
@@ -53,7 +53,7 @@ function App() {
           </Routes>
         </div>
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
