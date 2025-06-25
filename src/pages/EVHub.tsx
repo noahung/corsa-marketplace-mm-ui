@@ -1,250 +1,357 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
+import { Zap, MapPin, Clock, Phone, Navigation as NavIcon, Battery, Leaf, TrendingUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Zap, Battery, MapPin, TrendingUp, Leaf, DollarSign } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const EVHub = () => {
-  const evVehicles = [
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
+
+  const chargingStations = [
     {
-      id: 1,
-      make: 'Nissan',
-      model: 'Leaf',
-      price: '280-320',
-      range: '270 km',
-      chargingTime: '8 hours',
+      id: '1',
+      name: 'Junction Square Charging Hub',
+      address: 'Junction Square Mall, Kamayut Township',
+      location: 'Yangon',
+      type: 'DC Fast Charging',
+      status: 'Available',
+      distance: '2.5 km',
+      pricing: '800 MMK per kWh',
+      amenities: ['WiFi', 'Cafe', 'Shopping'],
+      latitude: 16.8409,
+      longitude: 96.1735
+    },
+    {
+      id: '2',
+      name: 'Yangon International Airport EV Station',
+      address: 'Yangon International Airport Terminal',
+      location: 'Yangon',
+      type: 'AC Charging',
+      status: 'Available',
+      distance: '15.2 km',
+      pricing: '600 MMK per kWh',
+      amenities: ['24/7', 'Security', 'Restrooms'],
+      latitude: 16.9073,
+      longitude: 96.1337
+    },
+    {
+      id: '3',
+      name: 'Mandalay City Center Charging Point',
+      address: 'Downtown Mandalay, 26th Street',
+      location: 'Mandalay',
+      type: 'DC Fast Charging',
+      status: 'Occupied',
+      distance: '8.7 km',
+      pricing: '750 MMK per kWh',
+      amenities: ['Covered', 'CCTV', 'Customer Support'],
+      latitude: 21.9588,
+      longitude: 96.0891
+    }
+  ];
+
+  const evModels = [
+    {
+      name: 'BYD Atto 3',
+      price: '65,000,000 MMK',
+      range: '420 km',
+      chargingTime: '30 min (10-80%)',
       image: '/placeholder.svg'
     },
     {
-      id: 2,
-      make: 'BYD',
-      model: 'Song Plus',
-      price: '450-520',
-      range: '505 km',
-      chargingTime: '6 hours',
-      image: '/placeholder.svg'
-    },
-    {
-      id: 3,
-      make: 'Tesla',
-      model: 'Model 3',
-      price: '800-950',
+      name: 'Tesla Model 3',
+      price: '85,000,000 MMK',
       range: '448 km',
-      chargingTime: '5 hours',
+      chargingTime: '25 min (10-80%)',
+      image: '/placeholder.svg'
+    },
+    {
+      name: 'Nissan Leaf',
+      price: '45,000,000 MMK',
+      range: '363 km',
+      chargingTime: '40 min (10-80%)',
       image: '/placeholder.svg'
     }
   ];
 
-  const chargingStations = [
-    { name: 'Yangon City Mall', location: 'Yangon', type: 'Fast Charging', status: 'Available' },
-    { name: 'Junction Square', location: 'Yangon', type: 'Standard', status: 'Available' },
-    { name: 'Mandalay Bay', location: 'Mandalay', type: 'Fast Charging', status: 'Occupied' },
-    { name: 'Naypyitaw Plaza', location: 'Naypyitaw', type: 'Super Fast', status: 'Available' }
-  ];
+  const filteredStations = chargingStations.filter(station => {
+    const matchesSearch = station.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         station.address.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesLocation = selectedLocation === '' || station.location === selectedLocation;
+    return matchesSearch && matchesLocation;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Hero Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Header */}
         <div className="text-center mb-12">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-2xl flex items-center justify-center">
-              <Zap className="w-8 h-8 text-white" />
-            </div>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Electric Vehicle Hub
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            EV Hub <span className="text-green-600">Myanmar</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Discover the future of mobility in Myanmar. Explore electric vehicles, find charging stations, and learn about the benefits of going electric.
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Your complete guide to electric vehicles in Myanmar - charging stations, EV models, and sustainable transport solutions
           </p>
         </div>
 
-        {/* Benefits Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
           <Card>
-            <CardContent className="text-center p-6">
-              <Leaf className="w-12 h-12 mx-auto mb-4 text-green-600" />
-              <h3 className="text-lg font-semibold mb-2">Environmental Benefits</h3>
-              <p className="text-gray-600">Zero emissions, reduced air pollution, and contribution to a cleaner Myanmar</p>
+            <CardContent className="p-6 text-center">
+              <Zap className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">150+</div>
+              <div className="text-sm text-gray-600">Charging Stations</div>
             </CardContent>
           </Card>
-
           <Card>
-            <CardContent className="text-center p-6">
-              <DollarSign className="w-12 h-12 mx-auto mb-4 text-blue-600" />
-              <h3 className="text-lg font-semibold mb-2">Cost Savings</h3>
-              <p className="text-gray-600">Lower running costs, reduced maintenance, and government incentives</p>
+            <CardContent className="p-6 text-center">
+              <Battery className="w-8 h-8 text-green-500 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">25</div>
+              <div className="text-sm text-gray-600">EV Models Available</div>
             </CardContent>
           </Card>
-
           <Card>
-            <CardContent className="text-center p-6">
-              <TrendingUp className="w-12 h-12 mx-auto mb-4 text-purple-600" />
-              <h3 className="text-lg font-semibold mb-2">Future Technology</h3>
-              <p className="text-gray-600">Advanced features, smart connectivity, and cutting-edge automotive technology</p>
+            <CardContent className="p-6 text-center">
+              <Leaf className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">85%</div>
+              <div className="text-sm text-gray-600">CO2 Reduction</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6 text-center">
+              <TrendingUp className="w-8 h-8 text-purple-500 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">300%</div>
+              <div className="text-sm text-gray-600">Growth This Year</div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Available EVs */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Available Electric Vehicles</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {evVehicles.map((vehicle) => (
-              <Card key={vehicle.id} className="overflow-hidden">
-                <div className="aspect-[4/3] bg-gray-200">
-                  <img 
-                    src={vehicle.image} 
-                    alt={`${vehicle.make} ${vehicle.model}`}
-                    className="w-full h-full object-cover"
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Charging Station Network */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="w-6 h-6 text-blue-600" />
+                  Charging Station Network
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* Search and Filter */}
+                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                  <Input
+                    placeholder="Search stations..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1"
                   />
+                  <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+                    <SelectTrigger className="w-full sm:w-48">
+                      <SelectValue placeholder="All Locations" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Locations</SelectItem>
+                      <SelectItem value="Yangon">Yangon</SelectItem>
+                      <SelectItem value="Mandalay">Mandalay</SelectItem>
+                      <SelectItem value="Naypyidaw">Naypyidaw</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-semibold">{vehicle.make} {vehicle.model}</h3>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
-                      Electric
-                    </Badge>
-                  </div>
-                  <div className="text-xl font-bold text-blue-600 mb-3">
-                    {vehicle.price} Lakhs Ks
-                  </div>
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <Battery className="w-4 h-4" />
-                      Range: {vehicle.range}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Zap className="w-4 h-4" />
-                      Charging: {vehicle.chargingTime}
-                    </div>
-                  </div>
-                  <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700">
-                    View Details
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
 
-        {/* Charging Stations */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Charging Station Network</h2>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
-                Available Charging Stations
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {chargingStations.map((station, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h3 className="font-semibold">{station.name}</h3>
-                      <p className="text-sm text-gray-600">{station.location} • {station.type}</p>
-                    </div>
-                    <Badge 
-                      variant={station.status === 'Available' ? 'default' : 'secondary'}
-                      className={station.status === 'Available' ? 'bg-green-600' : 'bg-orange-500'}
+                {/* Stations List */}
+                <div className="space-y-4">
+                  {filteredStations.map((station) => (
+                    <Link 
+                      key={station.id} 
+                      to={`/ev-hub/charging-station/${station.id}`}
+                      className="block"
                     >
-                      {station.status}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-              <Button className="w-full mt-4" variant="outline">
-                View All Stations on Map
-              </Button>
-            </CardContent>
-          </Card>
-        </section>
-
-        {/* Government Incentives */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Government Incentives</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Tax Benefits</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm">
-                  <li>• Reduced import duty on electric vehicles</li>
-                  <li>• Tax exemptions for first 3 years</li>
-                  <li>• Lower commercial vehicle registration fees</li>
-                  <li>• Subsidies for charging infrastructure</li>
-                </ul>
+                      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <h3 className="font-semibold text-lg">{station.name}</h3>
+                                <Badge variant={station.status === 'Available' ? 'default' : 'secondary'}>
+                                  {station.status}
+                                </Badge>
+                              </div>
+                              <div className="space-y-1 text-sm text-gray-600">
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="w-4 h-4" />
+                                  <span>{station.address}</span>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <span className="flex items-center gap-1">
+                                    <Zap className="w-4 h-4" />
+                                    {station.type}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <NavIcon className="w-4 h-4" />
+                                    {station.distance}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex flex-wrap gap-2 mt-3">
+                                {station.amenities.map((amenity) => (
+                                  <Badge key={amenity} variant="outline" className="text-xs">
+                                    {amenity}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-semibold text-green-600">
+                                {station.pricing}
+                              </div>
+                              <Button size="sm" className="mt-2">
+                                View Details
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
               </CardContent>
             </Card>
 
+            {/* Popular EV Models */}
             <Card>
               <CardHeader>
-                <CardTitle>Infrastructure Support</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Battery className="w-6 h-6 text-green-600" />
+                  Popular EV Models
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 text-sm">
-                  <li>• Free parking in designated areas</li>
-                  <li>• Priority lanes in major cities</li>
-                  <li>• Government-funded charging stations</li>
-                  <li>• Reduced electricity rates for EV charging</li>
-                </ul>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {evModels.map((model, index) => (
+                    <Card key={index} className="overflow-hidden">
+                      <div className="aspect-[16/10] overflow-hidden">
+                        <img 
+                          src={model.image} 
+                          alt={model.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold text-lg mb-2">{model.name}</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Price:</span>
+                            <span className="font-semibold text-green-600">{model.price}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Range:</span>
+                            <span>{model.range}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Charging:</span>
+                            <span>{model.chargingTime}</span>
+                          </div>
+                        </div>
+                        <Button className="w-full mt-4" variant="outline">
+                          Learn More
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </div>
-        </section>
 
-        {/* EV Guide */}
-        <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Getting Started with Electric Vehicles</h2>
-          <Card>
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg mx-auto mb-3 flex items-center justify-center">
-                    <span className="text-blue-600 font-bold text-lg">1</span>
-                  </div>
-                  <h3 className="font-semibold mb-2">Research Models</h3>
-                  <p className="text-sm text-gray-600">Compare different EV models and their specifications</p>
-                </div>
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button className="w-full justify-start" variant="outline">
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Find Nearest Station
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <Zap className="w-4 h-4 mr-2" />
+                  Plan Route
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <Phone className="w-4 h-4 mr-2" />
+                  Report Issue
+                </Button>
+              </CardContent>
+            </Card>
 
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg mx-auto mb-3 flex items-center justify-center">
-                    <span className="text-blue-600 font-bold text-lg">2</span>
+            {/* EV Benefits */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Why Choose Electric?</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <Leaf className="w-5 h-5 text-green-500 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium">Eco-Friendly</h4>
+                    <p className="text-sm text-gray-600">Zero emissions for cleaner air</p>
                   </div>
-                  <h3 className="font-semibold mb-2">Calculate Costs</h3>
-                  <p className="text-sm text-gray-600">Consider purchase price, running costs, and incentives</p>
                 </div>
+                <div className="flex items-start gap-3">
+                  <TrendingUp className="w-5 h-5 text-blue-500 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium">Cost Effective</h4>
+                    <p className="text-sm text-gray-600">Lower operating costs</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Zap className="w-5 h-5 text-purple-500 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium">Performance</h4>
+                    <p className="text-sm text-gray-600">Instant torque and quiet operation</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg mx-auto mb-3 flex items-center justify-center">
-                    <span className="text-blue-600 font-bold text-lg">3</span>
+            {/* Latest News */}
+            <Card>
+              <CardHeader>
+                <CardTitle>EV News</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="font-medium text-sm">New Charging Network Expansion</h4>
+                    <p className="text-xs text-gray-500">2 days ago</p>
                   </div>
-                  <h3 className="font-semibold mb-2">Plan Charging</h3>
-                  <p className="text-sm text-gray-600">Identify charging options at home and on the road</p>
-                </div>
-
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg mx-auto mb-3 flex items-center justify-center">
-                    <span className="text-blue-600 font-bold text-lg">4</span>
+                  <div>
+                    <h4 className="font-medium text-sm">Government EV Incentives 2024</h4>
+                    <p className="text-xs text-gray-500">1 week ago</p>
                   </div>
-                  <h3 className="font-semibold mb-2">Test Drive</h3>
-                  <p className="text-sm text-gray-600">Experience the smooth, quiet driving of electric vehicles</p>
+                  <div>
+                    <h4 className="font-medium text-sm">Tesla Opens Service Center</h4>
+                    <p className="text-xs text-gray-500">2 weeks ago</p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
 
-      <div className="pb-20 md:pb-0"></div>
+      <Footer />
     </div>
   );
 };

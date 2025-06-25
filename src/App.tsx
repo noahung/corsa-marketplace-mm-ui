@@ -19,6 +19,9 @@ import Dealers from './pages/Dealers';
 import ValuationPage from './pages/ValuationPage';
 import Advice from './pages/Advice';
 import EVHub from './pages/EVHub';
+import BlogDetail from './pages/BlogDetail';
+import ChargingStationDetail from './pages/ChargingStationDetail';
+import AdminCMS from './pages/AdminCMS';
 
 function App() {
   return (
@@ -34,6 +37,9 @@ function App() {
             <Route path="/valuation" element={<ValuationPage />} />
             <Route path="/advice" element={<Advice />} />
             <Route path="/ev-hub" element={<EVHub />} />
+            <Route path="/blog/:id" element={<BlogDetail />} />
+            <Route path="/ev-hub/charging-station/:id" element={<ChargingStationDetail />} />
+            <Route path="/admin/cms" element={<AdminCMS />} />
             <Route path="/vehicle/:id" element={<VehicleDetail />} />
             <Route path="/search" element={<SearchResults />} />
             <Route path="/login" element={<Login />} />
