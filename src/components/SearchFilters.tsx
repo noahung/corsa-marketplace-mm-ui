@@ -108,11 +108,12 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <label className="text-sm font-medium mb-2 block">Make</label>
-            <Select value={filters.make || undefined} onValueChange={(value) => handleFilterChange('make', value || '')}>
+            <Select value={filters.make} onValueChange={(value) => handleFilterChange('make', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select make" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="">All Makes</SelectItem>
                 {makes.map((make) => (
                   <SelectItem key={make} value={make}>
                     {make}
@@ -133,11 +134,12 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
 
           <div>
             <label className="text-sm font-medium mb-2 block">Location</label>
-            <Select value={filters.location || undefined} onValueChange={(value) => handleFilterChange('location', value || '')}>
+            <Select value={filters.location} onValueChange={(value) => handleFilterChange('location', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select location" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="">All Locations</SelectItem>
                 {locations.map((location) => (
                   <SelectItem key={location} value={location}>
                     {location}
@@ -151,11 +153,12 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium mb-2 block">Fuel Type</label>
-            <Select value={filters.fuelType || undefined} onValueChange={(value) => handleFilterChange('fuelType', value || '')}>
+            <Select value={filters.fuelType} onValueChange={(value) => handleFilterChange('fuelType', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select fuel type" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="">All Types</SelectItem>
                 <SelectItem value="petrol">Petrol</SelectItem>
                 <SelectItem value="diesel">Diesel</SelectItem>
                 <SelectItem value="hybrid">Hybrid</SelectItem>
@@ -166,11 +169,12 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
 
           <div>
             <label className="text-sm font-medium mb-2 block">Transmission</label>
-            <Select value={filters.transmission || undefined} onValueChange={(value) => handleFilterChange('transmission', value || '')}>
+            <Select value={filters.transmission} onValueChange={(value) => handleFilterChange('transmission', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select transmission" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="">All Types</SelectItem>
                 <SelectItem value="manual">Manual</SelectItem>
                 <SelectItem value="automatic">Automatic</SelectItem>
                 <SelectItem value="cvt">CVT</SelectItem>
