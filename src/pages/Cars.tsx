@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -195,7 +196,7 @@ const Cars = () => {
         <div className="flex gap-8">
           {/* Filters Sidebar */}
           <div className={`w-80 flex-shrink-0 ${showFilters ? 'block' : 'hidden'} md:block`}>
-            <SearchFilters />
+            <SearchFilters onFilterChange={handleFilterChange} />
           </div>
 
           {/* Vehicle Grid */}

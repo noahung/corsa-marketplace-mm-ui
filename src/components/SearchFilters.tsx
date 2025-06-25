@@ -2,228 +2,389 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 
 interface SearchFiltersProps {
-  filters?: {
-    make: string;
-    model: string;
-    minPrice: number;
-    maxPrice: number;
-    minYear: number;
-    maxYear: number;
-    fuelType: string;
-    transmission: string;
-    location: string;
-  };
-  onFilterChange?: (key: string, value: any) => void;
-  onClearFilters?: () => void;
-  onSearch?: () => void;
+  onFilterChange?: (filters: any) => void;
 }
 
-const SearchFilters: React.FC<SearchFiltersProps> = ({
-  filters: externalFilters,
-  onFilterChange: externalOnFilterChange,
-  onClearFilters,
-  onSearch
-}) => {
-  const [internalFilters, setInternalFilters] = useState({
+const SearchFilters = ({ onFilterChange }: SearchFiltersProps) => {
+  const [priceRange, setPriceRange] = useState([50, 500]);
+  const [yearRange, setYearRange] = useState([2015, 2024]);
+  const [mileageRange, setMileageRange] = useState([0, 100000]);
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [filters, setFilters] = useState({
     make: '',
     model: '',
-    minPrice: 0,
-    maxPrice: 10000,
-    minYear: 2000,
-    maxYear: 2024,
-    fuelType: '',
-    transmission: '',
-    location: ''
+    bodyType: [],
+    fuelType: [],
+    transmission: [],
+    condition: '',
+    color: '',
+    region: '',
+    sellerType: [],
+    financeAvailable: false
   });
 
-  const filters = externalFilters || internalFilters;
-  
-  const handleFilterChange = (key: string, value: any) => {
-    if (externalOnFilterChange) {
-      externalOnFilterChange(key, value);
-    } else {
-      setInternalFilters(prev => ({ ...prev, [key]: value }));
-    }
+  const makes = ['Toyota', 'Honda', 'Mazda', 'BMW', 'Mercedes-Benz', 'Audi', 'Nissan', 'Hyundai', 'Suzuki', 'Mitsubishi', 'Kawasaki', 'Yamaha'];
+  const bodyTypes = ['Sedan', 'SUV', 'Hatchback', 'Wagon', 'Coupe', 'Convertible', 'Sport Bike', 'Cruiser', 'Touring'];
+  const fuelTypes = ['Petrol', 'Diesel', 'Hybrid', 'Electric'];
+  const transmissions = ['Manual', 'Automatic', 'CVT', 'Semi-Automatic'];
+  const conditions = ['New', 'Excellent', 'Good', 'Fair'];
+  const colors = ['White', 'Black', 'Silver', 'Blue', 'Red', 'Green', 'Gray', 'Gold'];
+  const regions = ['Yangon', 'Mandalay', 'Naypyitaw', 'Bagan', 'Taunggyi', 'Mawlamyine', 'Pathein'];
+  const sellerTypes = ['Private', 'Dealer', 'Business'];
+
+  const updateFilter = (key: string, value: any) => {
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+    
+    const allFilters = {
+      ...newFilters,
+      priceRange,
+      yearRange,
+      mileageRange
+    };
+    
+    onFilterChange?.(allFilters);
   };
 
-  const handleClearFilters = () => {
-    if (onClearFilters) {
-      onClearFilters();
-    } else {
-      setInternalFilters({
-        make: '',
-        model: '',
-        minPrice: 0,
-        maxPrice: 10000,
-        minYear: 2000,
-        maxYear: 2024,
-        fuelType: '',
-        transmission: '',
-        location: ''
-      });
-    }
+  const updateArrayFilter = (key: string, value: string) => {
+    const currentArray = filters[key as keyof typeof filters] as string[];
+    const newArray = currentArray.includes(value)
+      ? currentArray.filter(item => item !== value)
+      : [...currentArray, value];
+    
+    updateFilter(key, newArray);
   };
 
-  const handleSearch = () => {
-    if (onSearch) {
-      onSearch();
-    }
+  const removeFilter = (filter: string) => {
+    setActiveFilters(prev => prev.filter(f => f !== filter));
   };
 
-  const makes = ['Toyota', 'Honda', 'Nissan', 'Suzuki', 'Mazda', 'BMW', 'Mercedes-Benz', 'Audi'];
-  const locations = ['Yangon', 'Mandalay', 'Naypyitaw', 'Mawlamyine', 'Taunggyi', 'Pathein'];
-
-  const activeFiltersCount = Object.entries(filters).filter(([key, value]) => {
-    if (key === 'minPrice' && value === 0) return false;
-    if (key === 'maxPrice' && value === 10000) return false;
-    if (key === 'minYear' && value === 2000) return false;
-    if (key === 'maxYear' && value === 2024) return false;
-    return value && value !== '';
-  }).length;
+  const clearAllFilters = () => {
+    setActiveFilters([]);
+    setPriceRange([50, 500]);
+    setYearRange([2015, 2024]);
+    setMileageRange([0, 100000]);
+    setFilters({
+      make: '',
+      model: '',
+      bodyType: [],
+      fuelType: [],
+      transmission: [],
+      condition: '',
+      color: '',
+      region: '',
+      sellerType: [],
+      financeAvailable: false
+    });
+    onFilterChange?.({});
+  };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Search Filters</CardTitle>
-          {activeFiltersCount > 0 && (
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary">{activeFiltersCount} active</Badge>
-              <Button variant="ghost" size="sm" onClick={handleClearFilters}>
-                <X className="w-4 h-4 mr-1" />
+    <div className="space-y-6">
+      {/* Active Filters */}
+      {activeFilters.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium">Active Filters</CardTitle>
+              <Button variant="ghost" size="sm" onClick={clearAllFilters}>
                 Clear All
               </Button>
             </div>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div>
-            <label className="text-sm font-medium mb-2 block">Make</label>
-            <Select value={filters.make} onValueChange={(value) => handleFilterChange('make', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select make" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Makes</SelectItem>
-                {makes.map((make) => (
-                  <SelectItem key={make} value={make}>
-                    {make}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {activeFilters.map((filter) => (
+                <Badge key={filter} variant="secondary" className="flex items-center gap-1">
+                  {filter}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => removeFilter(filter)} />
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-          <div>
-            <label className="text-sm font-medium mb-2 block">Model</label>
-            <Input
-              placeholder="Enter model"
-              value={filters.model}
-              onChange={(e) => handleFilterChange('model', e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium mb-2 block">Location</label>
-            <Select value={filters.location} onValueChange={(value) => handleFilterChange('location', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select location" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
-                {locations.map((location) => (
-                  <SelectItem key={location} value={location}>
-                    {location}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium mb-2 block">Fuel Type</label>
-            <Select value={filters.fuelType} onValueChange={(value) => handleFilterChange('fuelType', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select fuel type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
-                <SelectItem value="petrol">Petrol</SelectItem>
-                <SelectItem value="diesel">Diesel</SelectItem>
-                <SelectItem value="hybrid">Hybrid</SelectItem>
-                <SelectItem value="electric">Electric</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium mb-2 block">Transmission</label>
-            <Select value={filters.transmission} onValueChange={(value) => handleFilterChange('transmission', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select transmission" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
-                <SelectItem value="manual">Manual</SelectItem>
-                <SelectItem value="automatic">Automatic</SelectItem>
-                <SelectItem value="cvt">CVT</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div>
-          <label className="text-sm font-medium mb-2 block">
-            Price Range: {filters.minPrice} - {filters.maxPrice} Lakhs Ks
-          </label>
+      {/* Price Range */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Price Range (Lakhs Ks)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <Slider
-            value={[filters.minPrice, filters.maxPrice]}
-            onValueChange={([min, max]) => {
-              handleFilterChange('minPrice', min);
-              handleFilterChange('maxPrice', max);
+            value={priceRange}
+            onValueChange={(value) => {
+              setPriceRange(value);
+              onFilterChange?.({ ...filters, priceRange: value, yearRange, mileageRange });
             }}
-            min={0}
-            max={10000}
-            step={50}
+            max={1000}
+            min={10}
+            step={10}
             className="w-full"
           />
-        </div>
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <Label className="text-xs text-gray-500">Min</Label>
+              <Input value={`${priceRange[0]} Lakhs`} readOnly className="text-sm" />
+            </div>
+            <div className="flex-1">
+              <Label className="text-xs text-gray-500">Max</Label>
+              <Input value={`${priceRange[1]} Lakhs`} readOnly className="text-sm" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        <div>
-          <label className="text-sm font-medium mb-2 block">
-            Year Range: {filters.minYear} - {filters.maxYear}
-          </label>
+      {/* Year Range */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Year</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <Slider
-            value={[filters.minYear, filters.maxYear]}
-            onValueChange={([min, max]) => {
-              handleFilterChange('minYear', min);
-              handleFilterChange('maxYear', max);
+            value={yearRange}
+            onValueChange={(value) => {
+              setYearRange(value);
+              onFilterChange?.({ ...filters, priceRange, yearRange: value, mileageRange });
             }}
-            min={2000}
             max={2024}
+            min={2000}
             step={1}
             className="w-full"
           />
-        </div>
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <Label className="text-xs text-gray-500">From</Label>
+              <Input value={yearRange[0]} readOnly className="text-sm" />
+            </div>
+            <div className="flex-1">
+              <Label className="text-xs text-gray-500">To</Label>
+              <Input value={yearRange[1]} readOnly className="text-sm" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        {onSearch && (
-          <Button onClick={handleSearch} className="w-full bg-blue-600 hover:bg-blue-700">
-            Search Vehicles
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+      {/* Mileage Range */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Mileage (km)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Slider
+            value={mileageRange}
+            onValueChange={(value) => {
+              setMileageRange(value);
+              onFilterChange?.({ ...filters, priceRange, yearRange, mileageRange: value });
+            }}
+            max={200000}
+            min={0}
+            step={5000}
+            className="w-full"
+          />
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <Label className="text-xs text-gray-500">Min</Label>
+              <Input value={`${mileageRange[0].toLocaleString()} km`} readOnly className="text-sm" />
+            </div>
+            <div className="flex-1">
+              <Label className="text-xs text-gray-500">Max</Label>
+              <Input value={`${mileageRange[1].toLocaleString()} km`} readOnly className="text-sm" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Make */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Make</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select value={filters.make} onValueChange={(value) => updateFilter('make', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select make" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all-makes">All Makes</SelectItem>
+              {makes.map((make) => (
+                <SelectItem key={make} value={make.toLowerCase()}>
+                  {make}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
+      {/* Body Type */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Body Type</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {bodyTypes.map((type) => (
+            <div key={type} className="flex items-center space-x-2">
+              <Checkbox 
+                id={type} 
+                checked={filters.bodyType.includes(type)}
+                onCheckedChange={() => updateArrayFilter('bodyType', type)}
+              />
+              <Label htmlFor={type} className="text-sm">{type}</Label>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Fuel Type */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Fuel Type</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {fuelTypes.map((fuel) => (
+            <div key={fuel} className="flex items-center space-x-2">
+              <Checkbox 
+                id={fuel} 
+                checked={filters.fuelType.includes(fuel)}
+                onCheckedChange={() => updateArrayFilter('fuelType', fuel)}
+              />
+              <Label htmlFor={fuel} className="text-sm">{fuel}</Label>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Transmission */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Transmission</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {transmissions.map((trans) => (
+            <div key={trans} className="flex items-center space-x-2">
+              <Checkbox 
+                id={trans} 
+                checked={filters.transmission.includes(trans)}
+                onCheckedChange={() => updateArrayFilter('transmission', trans)}
+              />
+              <Label htmlFor={trans} className="text-sm">{trans}</Label>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Condition */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Condition</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select value={filters.condition} onValueChange={(value) => updateFilter('condition', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select condition" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all-conditions">All Conditions</SelectItem>
+              {conditions.map((condition) => (
+                <SelectItem key={condition} value={condition.toLowerCase()}>
+                  {condition}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
+      {/* Color */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Color</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select value={filters.color} onValueChange={(value) => updateFilter('color', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select color" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all-colors">All Colors</SelectItem>
+              {colors.map((color) => (
+                <SelectItem key={color} value={color.toLowerCase()}>
+                  {color}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
+      {/* Location */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Region</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select value={filters.region} onValueChange={(value) => updateFilter('region', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select region" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all-regions">All Regions</SelectItem>
+              {regions.map((region) => (
+                <SelectItem key={region} value={region.toLowerCase()}>
+                  {region}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
+      {/* Seller Type */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Seller Type</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {sellerTypes.map((type) => (
+            <div key={type} className="flex items-center space-x-2">
+              <Checkbox 
+                id={type} 
+                checked={filters.sellerType.includes(type)}
+                onCheckedChange={() => updateArrayFilter('sellerType', type)}
+              />
+              <Label htmlFor={type} className="text-sm">{type}</Label>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Finance Available */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Additional Options</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="finance" 
+              checked={filters.financeAvailable}
+              onCheckedChange={(checked) => updateFilter('financeAvailable', checked)}
+            />
+            <Label htmlFor="finance" className="text-sm">Finance Available</Label>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

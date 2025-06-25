@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -168,7 +169,7 @@ const Motorbikes = () => {
 
         <div className="flex gap-8">
           <div className={`w-80 flex-shrink-0 ${showFilters ? 'block' : 'hidden'} md:block`}>
-            <SearchFilters />
+            <SearchFilters onFilterChange={handleFilterChange} />
           </div>
 
           <div className="flex-1">
