@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
@@ -6,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import Footer from '@/components/Footer';
 
 const Blog = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -339,8 +339,6 @@ const Blog = () => {
 
       {/* Mobile Navigation Spacing */}
       <div className="pb-20 md:pb-0"></div>
-      
-      <Footer />
     </div>
   );
 };
