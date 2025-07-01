@@ -16,9 +16,12 @@ import AdminRates from './pages/AdminRates';
 import Cars from './pages/Cars';
 import Motorbikes from './pages/Motorbikes';
 import Dealers from './pages/Dealers';
+import DealerDetail from './pages/DealerDetail';
 import ValuationPage from './pages/ValuationPage';
 import Advice from './pages/Advice';
 import EVHub from './pages/EVHub';
+import Compare from './pages/Compare';
+import ChargingStationDetail from './pages/ChargingStationDetail';
 
 function App() {
   return (
@@ -31,9 +34,12 @@ function App() {
             <Route path="/cars" element={<Cars />} />
             <Route path="/motorbikes" element={<Motorbikes />} />
             <Route path="/dealers" element={<Dealers />} />
+            <Route path="/dealers/:id" element={<DealerDetail />} />
             <Route path="/valuation" element={<ValuationPage />} />
             <Route path="/advice" element={<Advice />} />
             <Route path="/ev-hub" element={<EVHub />} />
+            <Route path="/ev-hub/charging-station/:id" element={<ChargingStationDetail />} />
+            <Route path="/compare" element={<Compare />} />
             <Route path="/vehicle/:id" element={<VehicleDetail />} />
             <Route path="/search" element={<SearchResults />} />
             <Route path="/login" element={<Login />} />
