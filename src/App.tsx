@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Sell from './pages/Sell';
+import PostVehicle from './pages/PostVehicle';
 import FinanceInsurance from './pages/FinanceInsurance';
 import NotFound from './pages/NotFound';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -46,6 +47,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/sell" element={<Sell />} />
+            <Route path="/post-vehicle" element={<PostVehicle />} />
             <Route path="/finance" element={<FinanceInsurance />} />
             <Route path="/admin/rates" element={<AdminRates />} />
             <Route path="*" element={<NotFound />} />
