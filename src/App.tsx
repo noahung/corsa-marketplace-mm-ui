@@ -10,7 +10,7 @@ import Sell from './pages/Sell';
 import PostVehicle from './pages/PostVehicle';
 import FinanceInsurance from './pages/FinanceInsurance';
 import NotFound from './pages/NotFound';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { Toaster } from "@/components/ui/toaster"
 import AdminRates from './pages/AdminRates';
 import Cars from './pages/Cars';
@@ -24,6 +24,9 @@ import Compare from './pages/Compare';
 import ChargingStationDetail from './pages/ChargingStationDetail';
 
 function App() {
+  const { loading } = useAuth();
+  if (loading) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+
   return (
     <AuthProvider>
       <div className="min-h-screen bg-gray-50">
