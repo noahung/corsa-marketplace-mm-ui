@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
 import VehicleDetail from './pages/VehicleDetail';
 import SearchResults from './pages/SearchResults';
@@ -26,35 +25,33 @@ import ChargingStationDetail from './pages/ChargingStationDetail';
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <div className="min-h-screen bg-gray-50">
-          <Toaster />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/cars" element={<Cars />} />
-            <Route path="/motorbikes" element={<Motorbikes />} />
-            <Route path="/dealers" element={<Dealers />} />
-            <Route path="/dealers/:id" element={<DealerDetail />} />
-            <Route path="/valuation" element={<ValuationPage />} />
-            <Route path="/advice" element={<Advice />} />
-            <Route path="/ev-hub" element={<EVHub />} />
-            <Route path="/ev-hub/charging-station/:id" element={<ChargingStationDetail />} />
-            <Route path="/compare" element={<Compare />} />
-            <Route path="/vehicle/:id" element={<VehicleDetail />} />
-            <Route path="/search" element={<SearchResults />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/sell" element={<Sell />} />
-            <Route path="/post-vehicle" element={<PostVehicle />} />
-            <Route path="/finance" element={<FinanceInsurance />} />
-            <Route path="/admin/rates" element={<AdminRates />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </div>
-      </AuthProvider>
-    </BrowserRouter>
+    <AuthProvider>
+      <div className="min-h-screen bg-gray-50">
+        <Toaster />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/cars" element={<Cars />} />
+          <Route path="/motorbikes" element={<Motorbikes />} />
+          <Route path="/dealers" element={<Dealers />} />
+          <Route path="/dealers/:id" element={<DealerDetail />} />
+          <Route path="/valuation" element={<ValuationPage />} />
+          <Route path="/advice" element={<Advice />} />
+          <Route path="/ev-hub" element={<EVHub />} />
+          <Route path="/ev-hub/charging-station/:id" element={<ChargingStationDetail />} />
+          <Route path="/compare" element={<Compare />} />
+          <Route path="/vehicle/:id" element={<VehicleDetail />} />
+          <Route path="/search" element={<SearchResults />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/sell" element={<Sell />} />
+          <Route path="/post-vehicle" element={<PostVehicle />} />
+          <Route path="/finance-insurance" element={<FinanceInsurance />} />
+          <Route path="/admin/rates" element={<AdminRates />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
+    </AuthProvider>
   );
 }
 
