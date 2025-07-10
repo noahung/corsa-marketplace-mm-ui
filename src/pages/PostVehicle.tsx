@@ -102,10 +102,26 @@ const PostVehicle = () => {
     try {
       let listingId = editId;
       if (editId) {
-        // Update listing
+        // Only send editable fields
+        const updateData = {
+          title: data.title,
+          make: data.make,
+          model: data.model,
+          year: data.year,
+          price: data.price,
+          mileage: data.mileage,
+          fuel_type: data.fuel_type,
+          transmission: data.transmission,
+          condition: data.condition,
+          color: data.color,
+          region: data.region,
+          township: data.township,
+          seller_type: data.seller_type,
+          description: data.description,
+        };
         const { error } = await supabase
           .from('listings')
-          .update({ ...data })
+          .update(updateData)
           .eq('id', editId);
         if (error) throw error;
       } else {

@@ -50,6 +50,7 @@ function AppContent() {
         <Route path="/sell" element={<Sell />} />
         <Route path="/post-vehicle" element={<PostVehicle />} />
         <Route path="/finance-insurance" element={<FinanceInsurance />} />
+        <Route path="/finance" element={<FinanceInsurance />} />
         <Route path="/admin/rates" element={<AdminRates />} />
         <Route path="/edit-listing/:id" element={<EditListing />} />
         <Route path="*" element={<NotFound />} />
