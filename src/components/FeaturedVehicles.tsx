@@ -9,12 +9,12 @@ const FeaturedVehicles = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchFeatured = async () => {
+    const fetchListings = async () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('listings')
         .select('*, listing_images (url)')
-        .eq('is_featured', true)
+        .order('created_at', { ascending: false })
         .limit(6);
       if (!error && data) {
         setFeaturedVehicles(
@@ -39,7 +39,7 @@ const FeaturedVehicles = () => {
       }
       setLoading(false);
     };
-    fetchFeatured();
+    fetchListings();
   }, []);
 
   return (
@@ -73,13 +73,13 @@ const FeaturedVehicles = () => {
               <VehicleCard key={vehicle.id} {...vehicle} />
             ))
           ) : (
-            <div className="col-span-3 text-center text-gray-500">No featured vehicles found.</div>
+            <div className="col-span-3 text-center text-gray-500">No vehicles found.</div>
           )}
         </div>
         {/* View All Button */}
         <div className="text-center mt-8">
           <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-xl">
-            View All Featured Vehicles
+            View All Vehicles
           </Button>
         </div>
       </div>

@@ -1,7 +1,7 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Car, Bike, ShoppingCart, Tag, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CategoryTabsProps {
   activeCategory?: string;
@@ -11,13 +11,34 @@ interface CategoryTabsProps {
 
 const CategoryTabs = ({ activeCategory = 'all', onCategoryChange, className = '' }: CategoryTabsProps) => {
   const [active, setActive] = useState(activeCategory);
+  const [counts, setCounts] = useState({ all: 0, cars: 0, motorbikes: 0, dealers: 0 });
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      // All vehicles
+      const { count: allCount } = await supabase.from('listings').select('*', { count: 'exact', head: true });
+      // Cars
+      const { count: carCount } = await supabase.from('listings').select('*', { count: 'exact', head: true }).eq('category', 'car');
+      // Motorbikes
+      const { count: bikeCount } = await supabase.from('listings').select('*', { count: 'exact', head: true }).eq('category', 'motorbike');
+      // Dealers
+      const { count: dealerCount } = await supabase.from('dealers').select('*', { count: 'exact', head: true });
+      setCounts({
+        all: allCount || 0,
+        cars: carCount || 0,
+        motorbikes: bikeCount || 0,
+        dealers: dealerCount || 0,
+      });
+    };
+    fetchCounts();
+  }, []);
 
   const categories = [
-    { id: 'all', label: 'All Vehicles', icon: ShoppingCart, count: '12,543' },
-    { id: 'cars', label: 'Cars', icon: Car, count: '8,234' },
-    { id: 'motorbikes', label: 'Motorbikes', icon: Bike, count: '3,421' },
+    { id: 'all', label: 'All Vehicles', icon: ShoppingCart, count: counts.all },
+    { id: 'cars', label: 'Cars', icon: Car, count: counts.cars },
+    { id: 'motorbikes', label: 'Motorbikes', icon: Bike, count: counts.motorbikes },
     { id: 'sell', label: 'Sell', icon: Tag, count: null },
-    { id: 'dealers', label: 'Dealers', icon: Building, count: '152' }
+    { id: 'dealers', label: 'Dealers', icon: Building, count: counts.dealers }
   ];
 
   const handleCategoryClick = (categoryId: string) => {
@@ -46,13 +67,13 @@ const CategoryTabs = ({ activeCategory = 'all', onCategoryChange, className = ''
               >
                 <Icon className="w-4 h-4" />
                 <span className="font-medium">{category.label}</span>
-                {category.count && (
+                {category.count !== null && category.count !== undefined && (
                   <span className={`text-xs px-2 py-1 rounded-full ${
                     isActive 
                       ? 'bg-white/20 text-white' 
                       : 'bg-gray-200 text-gray-600'
                   }`}>
-                    {category.count}
+                    {category.count.toLocaleString()}
                   </span>
                 )}
               </Button>
