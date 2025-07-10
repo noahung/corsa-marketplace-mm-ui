@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Calendar, Gauge, Fuel, Eye, Share2 } from 'lucide-react';
@@ -24,6 +23,9 @@ interface VehicleCardProps {
   images: string[];
   featured?: boolean;
   className?: string;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  showActions?: boolean;
 }
 
 const VehicleCard = ({ 
@@ -38,7 +40,10 @@ const VehicleCard = ({
   seller, 
   images, 
   featured = false,
-  className = '' 
+  className = '' ,
+  onEdit,
+  onDelete,
+  showActions = false
 }: VehicleCardProps) => {
   
   const vehicleData = {
@@ -150,6 +155,12 @@ const VehicleCard = ({
             </Button>
           </Link>
           <CompareButton vehicleId={id} vehicleData={vehicleData} />
+          {showActions && (
+            <>
+              <Button variant="outline" size="sm" onClick={onEdit} className="rounded-xl border-blue-500 text-blue-600 hover:bg-blue-50">Edit</Button>
+              <Button variant="destructive" size="sm" onClick={onDelete} className="rounded-xl">Delete</Button>
+            </>
+          )}
         </div>
       </div>
     </div>

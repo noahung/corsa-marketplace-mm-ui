@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
@@ -94,16 +93,22 @@ const PostVehicle = () => {
 
           if (uploadError) throw uploadError;
 
-          const { data: { publicUrl } } = supabase.storage
+          // Get the public URL for the uploaded image
+          const publicUrlResult = supabase.storage
             .from('vehicle-images')
             .getPublicUrl(fileName);
+          const publicUrl = publicUrlResult.data.publicUrl;
 
-          return supabase
+          if (!publicUrl) throw new Error('Failed to get public URL for image.');
+
+          // Insert image record into listing_images table
+          const { error: insertError } = await supabase
             .from('listing_images')
             .insert({
               listing_id: listing.id,
               url: publicUrl
             });
+          if (insertError) throw insertError;
         });
 
         await Promise.all(imagePromises);

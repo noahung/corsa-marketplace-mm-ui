@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,11 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle, Car, Eye, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import VehicleCard from '@/components/VehicleCard';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('listings');
   const [myListings, setMyListings] = useState([]);
   const [wishlist, setWishlist] = useState([]);
@@ -108,6 +108,27 @@ const Dashboard = () => {
     }
   };
 
+  const handleEditListing = (listingId: string) => {
+    navigate(`/edit-listing/${listingId}`);
+  };
+
+  const handleDeleteListing = async (listingId: string) => {
+    if (!window.confirm('Are you sure you want to delete this listing? This action cannot be undone.')) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase.from('listings').delete().eq('id', listingId);
+      if (error) {
+        alert('Failed to delete listing: ' + error.message);
+      } else {
+        setMyListings(prev => prev.filter((l: any) => l.id !== listingId));
+      }
+    } catch (err) {
+      alert('An unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -180,7 +201,13 @@ const Dashboard = () => {
             {myListings.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {myListings.map((vehicle: any) => (
-                  <VehicleCard key={vehicle.id} {...vehicle} />
+                  <VehicleCard
+                    key={vehicle.id}
+                    {...vehicle}
+                    showActions={true}
+                    onEdit={() => handleEditListing(vehicle.id)}
+                    onDelete={() => handleDeleteListing(vehicle.id)}
+                  />
                 ))}
               </div>
             ) : (
