@@ -23,37 +23,43 @@ import EVHub from './pages/EVHub';
 import Compare from './pages/Compare';
 import ChargingStationDetail from './pages/ChargingStationDetail';
 
-function App() {
+function AppContent() {
   const { loading } = useAuth();
   if (loading) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
 
   return (
+    <div className="min-h-screen bg-gray-50">
+      <Toaster />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/cars" element={<Cars />} />
+        <Route path="/motorbikes" element={<Motorbikes />} />
+        <Route path="/dealers" element={<Dealers />} />
+        <Route path="/dealers/:id" element={<DealerDetail />} />
+        <Route path="/valuation" element={<ValuationPage />} />
+        <Route path="/advice" element={<Advice />} />
+        <Route path="/ev-hub" element={<EVHub />} />
+        <Route path="/ev-hub/charging-station/:id" element={<ChargingStationDetail />} />
+        <Route path="/compare" element={<Compare />} />
+        <Route path="/vehicle/:id" element={<VehicleDetail />} />
+        <Route path="/search" element={<SearchResults />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/sell" element={<Sell />} />
+        <Route path="/post-vehicle" element={<PostVehicle />} />
+        <Route path="/finance-insurance" element={<FinanceInsurance />} />
+        <Route path="/admin/rates" element={<AdminRates />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </div>
+  );
+}
+
+function App() {
+  return (
     <AuthProvider>
-      <div className="min-h-screen bg-gray-50">
-        <Toaster />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/cars" element={<Cars />} />
-          <Route path="/motorbikes" element={<Motorbikes />} />
-          <Route path="/dealers" element={<Dealers />} />
-          <Route path="/dealers/:id" element={<DealerDetail />} />
-          <Route path="/valuation" element={<ValuationPage />} />
-          <Route path="/advice" element={<Advice />} />
-          <Route path="/ev-hub" element={<EVHub />} />
-          <Route path="/ev-hub/charging-station/:id" element={<ChargingStationDetail />} />
-          <Route path="/compare" element={<Compare />} />
-          <Route path="/vehicle/:id" element={<VehicleDetail />} />
-          <Route path="/search" element={<SearchResults />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/sell" element={<Sell />} />
-          <Route path="/post-vehicle" element={<PostVehicle />} />
-          <Route path="/finance-insurance" element={<FinanceInsurance />} />
-          <Route path="/admin/rates" element={<AdminRates />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </div>
+      <AppContent />
     </AuthProvider>
   );
 }
