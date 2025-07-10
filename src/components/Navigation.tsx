@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, Menu, X, User, Car, Zap, Calculator, CreditCard, BookOpen, LogOut } from 'lucide-react';
@@ -48,11 +47,13 @@ const Navigation = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
-                <Car className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-gray-900">Corsa</span>
+            <Link to="/">
+              <img
+                src="https://mhhfarkrqczisaxkzyla.supabase.co/storage/v1/object/public/misc//corsa%20logo.png"
+                alt="Corsa Logo"
+                className="h-8 w-auto mr-2"
+                style={{ maxHeight: '32px', width: 'auto' }}
+              />
             </Link>
 
             {/* Navigation Links */}
