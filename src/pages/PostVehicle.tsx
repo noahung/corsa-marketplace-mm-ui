@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -37,111 +37,147 @@ const PostVehicle = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [images, setImages] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { id: editId } = useParams<{ id?: string }>();
 
   const form = useForm<VehicleFormData>({
     defaultValues: {
       seller_type: 'Private',
       condition: 'Used',
       fuel_type: 'Petrol',
-      transmission: 'Manual'
-    }
+      transmission: 'Manual',
+    },
   });
+
+  useEffect(() => {
+    const fetchListing = async () => {
+      if (!editId) return;
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('listings')
+        .select('*, listing_images (url)')
+        .eq('id', editId)
+        .single();
+      if (data) {
+        form.reset({
+          ...data,
+          price: Number(data.price),
+          year: Number(data.year),
+          mileage: Number(data.mileage),
+        });
+        setExistingImages(data.listing_images?.map((img: any) => img.url) || []);
+      }
+      setLoading(false);
+    };
+
+    fetchListing();
+  }, [editId, form]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    setImages(prev => [...prev, ...files].slice(0, 8)); // Limit to 8 images
+    setImages(prev => [...prev, ...files].slice(0, 8));
   };
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const removeExistingImage = (url: string) => {
+    setExistingImages(prev => prev.filter(img => img !== url));
+  };
+
   const onSubmit = async (data: VehicleFormData) => {
     if (!user) {
       toast({
-        title: "Authentication Required",
-        description: "Please login to post a vehicle listing.",
-        variant: "destructive"
+        title: 'Authentication Required',
+        description: 'Please login to post a vehicle listing.',
+        variant: 'destructive',
       });
       navigate('/login');
       return;
     }
-
     setIsSubmitting(true);
-
     try {
-      // Insert the listing
-      const { data: listing, error: listingError } = await supabase
-        .from('listings')
-        .insert({
-          ...data,
-          owner_id: user.id,
-        })
-        .select()
-        .single();
-
-      if (listingError) throw listingError;
-
-      // Upload images if any
+      let listingId = editId;
+      if (editId) {
+        // Update listing
+        const { error } = await supabase
+          .from('listings')
+          .update({ ...data })
+          .eq('id', editId);
+        if (error) throw error;
+      } else {
+        // Insert new listing
+        const { data: listing, error: listingError } = await supabase
+          .from('listings')
+          .insert({ ...data, owner_id: user.id })
+          .select()
+          .single();
+        if (listingError) throw listingError;
+        listingId = listing.id;
+      }
+      // Remove deleted images
+      if (editId) {
+        const { data: oldImages } = await supabase
+          .from('listing_images')
+          .select('url')
+          .eq('listing_id', editId);
+        for (const img of oldImages || []) {
+          if (!existingImages.includes(img.url)) {
+            await supabase.from('listing_images').delete().eq('url', img.url);
+          }
+        }
+      }
+      // Upload new images
       if (images.length > 0) {
         const imagePromises = images.map(async (image, index) => {
-          const fileName = `${listing.id}-${index}-${Date.now()}`;
-          const { data: uploadData, error: uploadError } = await supabase.storage
+          const fileName = `${listingId}-${index}-${Date.now()}`;
+          const { error: uploadError } = await supabase.storage
             .from('vehicle-images')
             .upload(fileName, image);
-
           if (uploadError) throw uploadError;
-
-          // Get the public URL for the uploaded image
           const publicUrlResult = supabase.storage
             .from('vehicle-images')
             .getPublicUrl(fileName);
           const publicUrl = publicUrlResult.data.publicUrl;
-
           if (!publicUrl) throw new Error('Failed to get public URL for image.');
-
-          // Insert image record into listing_images table
           const { error: insertError } = await supabase
             .from('listing_images')
-            .insert({
-              listing_id: listing.id,
-              url: publicUrl
-            });
+            .insert({ listing_id: listingId, url: publicUrl });
           if (insertError) throw insertError;
         });
-
         await Promise.all(imagePromises);
       }
-
       toast({
-        title: "Success!",
-        description: "Your vehicle listing has been posted successfully.",
+        title: editId ? 'Listing updated!' : 'Success!',
+        description: editId ? 'Your vehicle listing has been updated.' : 'Your vehicle listing has been posted successfully.',
       });
-
       navigate('/dashboard');
     } catch (error) {
-      console.error('Error posting vehicle:', error);
       toast({
-        title: "Error",
-        description: "Failed to post your vehicle listing. Please try again.",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to save your vehicle listing. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Post Your Vehicle</h1>
-          <p className="text-gray-600 mt-2">Fill in the details below to create your vehicle listing</p>
+          <h1 className="text-3xl font-bold text-gray-900">{editId ? 'Edit Your Vehicle' : 'Post Your Vehicle'}</h1>
+          <p className="text-gray-600 mt-2">Fill in the details below to {editId ? 'update' : 'create'} your vehicle listing</p>
         </div>
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             {/* Basic Information */}
@@ -463,6 +499,29 @@ const PostVehicle = () => {
                     </div>
                   </div>
 
+                  {/* Existing Images */}
+                  {existingImages.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {existingImages.map((url, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={url}
+                            alt={`Existing Preview ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeExistingImage(url)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* New Images */}
                   {images.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {images.map((image, index) => (
@@ -497,7 +556,7 @@ const PostVehicle = () => {
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Posting...' : 'Post Vehicle'}
+                {isSubmitting ? (editId ? 'Updating...' : 'Posting...') : (editId ? 'Update Vehicle' : 'Post Vehicle')}
               </Button>
             </div>
           </form>

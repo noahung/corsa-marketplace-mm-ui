@@ -22,6 +22,7 @@ import Advice from './pages/Advice';
 import EVHub from './pages/EVHub';
 import Compare from './pages/Compare';
 import ChargingStationDetail from './pages/ChargingStationDetail';
+import EditListing from './pages/EditListing';
 
 function AppContent() {
   const { loading } = useAuth();
@@ -50,6 +51,7 @@ function AppContent() {
         <Route path="/post-vehicle" element={<PostVehicle />} />
         <Route path="/finance-insurance" element={<FinanceInsurance />} />
         <Route path="/admin/rates" element={<AdminRates />} />
+        <Route path="/edit-listing/:id" element={<EditListing />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

@@ -261,7 +261,7 @@ const VehicleDetail = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-3xl font-bold text-blue-600">{vehicle.price} Lakhs Ks</div>
+                    <div className="text-3xl font-bold text-blue-600">{(vehicle.price / 100000).toLocaleString(undefined, { maximumFractionDigits: 2 })} Lakhs Ks</div>
                   </div>
                 </div>
               </CardHeader>
@@ -367,7 +367,7 @@ const VehicleDetail = () => {
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
                   <div className="text-sm text-gray-600 mb-1">Estimated Monthly Payment</div>
                   <div className="text-2xl font-bold text-blue-600">
-                    {Math.round(vehicle.price * 0.008)} Lakhs Ks
+                    {Math.round(vehicle.price * 0.008 / 100000).toLocaleString()} Lakhs Ks
                   </div>
                   <div className="text-xs text-gray-500">Based on 20% down payment, 5 years</div>
                 </div>

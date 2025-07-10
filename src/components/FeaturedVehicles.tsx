@@ -1,63 +1,46 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import VehicleCard from './VehicleCard';
+import { supabase } from '@/integrations/supabase/client';
 
 const FeaturedVehicles = () => {
-  const featuredVehicles = [
-    {
-      id: '1',
-      title: '2019 Toyota Camry 2.5 Hybrid Premium',
-      price: '285 Lakhs',
-      year: 2019,
-      mileage: '32,000 km',
-      fuel: 'Hybrid',
-      transmission: 'CVT',
-      location: 'Yangon',
-      seller: {
-        type: 'Dealer' as const,
-        name: 'Elite Motors',
-        verified: true
-      },
-      images: ['/placeholder.svg'],
-      featured: true
-    },
-    {
-      id: '2',
-      title: '2020 Honda CR-V 1.5 Turbo AWD',
-      price: '450 Lakhs',
-      year: 2020,
-      mileage: '28,500 km',
-      fuel: 'Petrol',
-      transmission: 'CVT',
-      location: 'Mandalay',
-      seller: {
-        type: 'Dealer' as const,
-        name: 'Premium Auto',
-        verified: true
-      },
-      images: ['/placeholder.svg'],
-      featured: true
-    },
-    {
-      id: '3',
-      title: '2018 Suzuki Swift Sport 1.4 Boosterjet',
-      price: '175 Lakhs',
-      year: 2018,
-      mileage: '45,000 km',
-      fuel: 'Petrol',
-      transmission: 'Manual',
-      location: 'Yangon',
-      seller: {
-        type: 'Private' as const,
-        name: 'Ko Thant',
-        verified: false
-      },
-      images: ['/placeholder.svg'],
-      featured: true
-    }
-  ];
+  const [featuredVehicles, setFeaturedVehicles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('listings')
+        .select('*, listing_images (url)')
+        .eq('is_featured', true)
+        .limit(6);
+      if (!error && data) {
+        setFeaturedVehicles(
+          data.map((item: any) => ({
+            id: item.id.toString(),
+            title: item.title,
+            price: item.price,
+            year: item.year,
+            mileage: `${item.mileage?.toLocaleString()} km`,
+            fuel: item.fuel_type,
+            transmission: item.transmission,
+            location: `${item.township}, ${item.region}`,
+            seller: {
+              type: item.seller_type === 'Dealer' ? 'Dealer' : 'Private',
+              name: item.seller_type === 'Dealer' ? 'Dealer' : 'Private Seller',
+              verified: item.seller_type === 'Dealer',
+            },
+            images: item.listing_images?.map((img: any) => img.url) || ['/placeholder.svg'],
+            featured: item.is_featured,
+          }))
+        );
+      }
+      setLoading(false);
+    };
+    fetchFeatured();
+  }, []);
 
   return (
     <section className="py-12 bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -72,7 +55,6 @@ const FeaturedVehicles = () => {
               Hand-picked premium vehicles from trusted sellers
             </p>
           </div>
-          
           <div className="hidden md:flex gap-2">
             <Button variant="outline" size="sm" className="rounded-lg">
               <ChevronLeft className="w-4 h-4" />
@@ -82,14 +64,18 @@ const FeaturedVehicles = () => {
             </Button>
           </div>
         </div>
-
         {/* Featured Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredVehicles.map((vehicle) => (
-            <VehicleCard key={vehicle.id} {...vehicle} />
-          ))}
+          {loading ? (
+            <div className="col-span-3 text-center">Loading...</div>
+          ) : featuredVehicles.length > 0 ? (
+            featuredVehicles.map((vehicle) => (
+              <VehicleCard key={vehicle.id} {...vehicle} />
+            ))
+          ) : (
+            <div className="col-span-3 text-center text-gray-500">No featured vehicles found.</div>
+          )}
         </div>
-
         {/* View All Button */}
         <div className="text-center mt-8">
           <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-xl">
