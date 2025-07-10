@@ -50,6 +50,11 @@ const VehicleCard = ({
     title, price, year, mileage, fuel, transmission, location, seller, images
   };
 
+  // Format price in Lakhs
+  const priceNumber = typeof price === 'string' ? parseFloat(price) : price;
+  const priceLakhs = priceNumber / 100000;
+  const formattedLakhs = priceLakhs.toLocaleString(undefined, { maximumFractionDigits: 2 });
+
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -112,7 +117,7 @@ const VehicleCard = ({
         {/* Title & Price */}
         <div className="mb-3">
           <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">{title}</h3>
-          <p className="text-lg font-bold text-blue-600">{price} Ks</p>
+          <p className="text-lg font-bold text-blue-600">{formattedLakhs} Lakhs Ks</p>
         </div>
 
         {/* Specs */}
