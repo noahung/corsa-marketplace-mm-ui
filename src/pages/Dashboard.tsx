@@ -8,7 +8,9 @@ import { Heart, MessageCircle, Car, Eye, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
+
 import VehicleCard from '@/components/VehicleCard';
+import ProfileInfo from '@/components/ProfileInfo';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -160,8 +162,11 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Profile Info Section */}
+        <ProfileInfo />
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">My Dashboard</h1>
           <p className="text-gray-600">Manage your listings, wishlist, and enquiries</p>
@@ -226,11 +231,25 @@ const Dashboard = () => {
 
           <TabsContent value="wishlist" className="space-y-6">
             <h2 className="text-xl font-semibold">My Wishlist</h2>
-            
+
             {wishlist.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {wishlist.map((vehicle: any) => (
-                  <VehicleCard key={vehicle.id} {...vehicle} />
+                  <div key={vehicle.id} className="relative group">
+                    <VehicleCard {...vehicle} />
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="absolute top-3 right-3 opacity-80 group-hover:opacity-100 z-10"
+                      onClick={async () => {
+                        // Remove from favorites table
+                        await supabase.from('favorites').delete().eq('user_id', user.id).eq('listing_id', vehicle.id);
+                        setWishlist((prev: any[]) => prev.filter((v: any) => v.id !== vehicle.id));
+                      }}
+                    >
+                      Remove from Wishlist
+                    </Button>
+                  </div>
                 ))}
               </div>
             ) : (
