@@ -11,6 +11,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import VehicleCard from '@/components/VehicleCard';
 import ProfileInfo from '@/components/ProfileInfo';
+import ChatModal from '@/components/ChatModal';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -20,6 +21,9 @@ const Dashboard = () => {
   const [wishlist, setWishlist] = useState([]);
   const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [chatModalOpen, setChatModalOpen] = useState(false);
+  const [activeChat, setActiveChat] = useState<any>(null);
+  const [unreadCounts, setUnreadCounts] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
     if (user) {
@@ -93,15 +97,20 @@ const Dashboard = () => {
       // Fetch enquiries using chats table
       const { data: enquiriesData } = await supabase
         .from('chats')
-        .select(`
-          *,
-          listings (title, id)
-        `)
+        .select(`*, listings (title, id)`)
         .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
         .order('created_at', { ascending: false });
 
       if (enquiriesData) {
         setEnquiries(enquiriesData);
+        // Calculate unread counts per conversation (listing_id)
+        const unread: { [key: string]: number } = {};
+        enquiriesData.forEach((msg: any) => {
+          if (msg.receiver_id === userId && !msg.read_at) {
+            unread[msg.listing_id] = (unread[msg.listing_id] || 0) + 1;
+          }
+        });
+        setUnreadCounts(unread);
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -182,9 +191,14 @@ const Dashboard = () => {
               <Heart className="w-4 h-4" />
               Wishlist ({wishlist.length})
             </TabsTrigger>
-            <TabsTrigger value="enquiries" className="flex items-center gap-2">
+            <TabsTrigger value="enquiries" className="flex items-center gap-2 relative">
               <MessageCircle className="w-4 h-4" />
               Messages ({enquiries.length})
+              {Object.values(unreadCounts).reduce((a, b) => a + b, 0) > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                  {Object.values(unreadCounts).reduce((a, b) => a + b, 0)}
+                </span>
+              )}
             </TabsTrigger>
             <TabsTrigger value="stats" className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
@@ -268,11 +282,22 @@ const Dashboard = () => {
 
           <TabsContent value="enquiries" className="space-y-6">
             <h2 className="text-xl font-semibold">Messages</h2>
-            
+
             {enquiries.length > 0 ? (
               <div className="space-y-4">
                 {enquiries.map((enquiry: any) => (
-                  <Card key={enquiry.id}>
+                  <Card key={enquiry.id} className="cursor-pointer hover:shadow-lg transition relative" onClick={async () => {
+                    setActiveChat(enquiry);
+                    setChatModalOpen(true);
+                    // Mark all messages in this conversation as read
+                    await supabase.from('chats')
+                      .update({ read_at: new Date().toISOString() })
+                      .eq('listing_id', enquiry.listing_id)
+                      .eq('receiver_id', user.id)
+                      .is('read_at', null);
+                    // Refresh unread counts
+                    fetchDashboardData();
+                  }}>
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div>
@@ -281,10 +306,13 @@ const Dashboard = () => {
                             {enquiry.sender_id === parseInt(user.id) ? 'Your message' : 'Received message'}
                           </p>
                         </div>
-                        <div className="flex gap-2">
-                          <Badge variant="outline">
-                            Message
-                          </Badge>
+                        <div className="flex gap-2 items-center">
+                          <Badge variant="outline">Message</Badge>
+                          {unreadCounts[enquiry.listing_id] > 0 && (
+                            <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                              {unreadCounts[enquiry.listing_id]}
+                            </span>
+                          )}
                         </div>
                       </div>
                       <p className="text-gray-700 mb-4">{enquiry.message}</p>
@@ -304,6 +332,9 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Chat Modal */}
+            <ChatModal open={chatModalOpen} onClose={() => setChatModalOpen(false)} chat={activeChat} userId={user.id} />
           </TabsContent>
 
           <TabsContent value="stats" className="space-y-6">
